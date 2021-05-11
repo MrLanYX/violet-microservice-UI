@@ -66,6 +66,11 @@ export const constantRoutes = [
       }
     ]
   },
+  // {
+  //   path: '',
+  //   component: (resolve) => require(['@/views/index'], resolve),
+  //   hidden: true
+  // },
   {
     path: '/user',
     component: Layout,
