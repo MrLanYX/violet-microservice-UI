@@ -1,0 +1,71 @@
+$boxBorder:#aaa; // 盒子边框颜色
+$boxBg:#e5e5e5; // 盒子背景色
+$text:#000; // 文字颜色
+$textHover:#fff; // 文字鼠标经过色
+$textHoverBg:#c0fefc; // 文字经过背景色
+$textBg:#77acf1; // 文字选中背景色
+$mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
+
+.cloud-main {
+    width: 100%;
+    height: 100%;
+
+    // 双端占满屏幕
+    >div {
+        width: 100%;
+        height: 100%;
+    }
+
+    // 网页端页面 --start
+    .indexWin {
+        background: url(../images/cloudBg.jpg) no-repeat;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+
+        //底部导航栏
+        .bottom-nav {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            height: 55px;
+            >div:first-child{
+                position: absolute;
+                left: 0;
+            }
+            >div:last-child{
+                position: absolute;
+                right: 0;
+            }
+            .el-divider--vertical{
+                width: 3px;
+                height: 40px;
+                background: #555;
+            }
+        }
+
+        // 网页端云盘通用样式 --start
+        // 拖拽文件夹样式
+        .folder {
+            background: $boxBg;
+        }
+
+        // 容器的基本样式
+        .box {
+            border: 1px solid $boxBorder;
+            border-radius: 12px;
+        }
+
+        // 磨砂质感
+        .ms {
+            background: $mosha;
+            backdrop-filter: blur(30px);
+            box-shadow: rgb(16 16 16 / 30%) 0px 4px 10px;
+        }
+
+        // 网页端云盘通用样式 --end
+    }
+
+    // 网页端页面 --end
+}
