@@ -1,14 +1,21 @@
 $boxBorder:#aaa; // 盒子边框颜色
-$boxBg:#e5e5e5; // 盒子背景色
+$boxBgWhite:#fff; // 盒子工具背景色白
+$boxBg:#f5f5f5; // 盒子背景色
 $text:#000; // 文字颜色
 $textHover:#fff; // 文字鼠标经过色
 $textHoverBg:#c0fefc; // 文字经过背景色
 $textBg:#77acf1; // 文字选中背景色
 $mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
+$boxS:#555; // 盒子阴影
 
 .cloud-main {
     width: 100%;
     height: 100%;
+
+    // 文字不能选中
+    * {
+        user-select: none;
+    }
 
     // 双端占满屏幕
     >div {
@@ -22,6 +29,7 @@ $mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
         background-size: cover;
         background-position: center;
         position: relative;
+        overflow: hidden;
 
         //底部导航栏
         .bottom-nav {
@@ -30,27 +38,163 @@ $mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
             left: 15px;
             right: 15px;
             height: 55px;
-            >div:first-child{
+
+            // 左侧系统工具
+            >div:first-child {
                 position: absolute;
                 left: 0;
             }
-            >div:last-child{
+
+            // 右侧信息
+            >div:last-child {
                 position: absolute;
                 right: 0;
             }
-            .el-divider--vertical{
+
+            // 纵向分割线
+            .el-divider--vertical {
                 width: 3px;
                 height: 40px;
                 background: #555;
             }
+
+            // 横向分割线
+            .el-divider--horizontal {
+                width: auto;
+                height: 2px;
+                background: #555;
+                margin: 2px 0;
+            }
+
+            // 当前时间
+            .timer {
+                font-weight: 700;
+            }
+        }
+
+        // 桌面文件夹区域
+        .folder-box {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 75px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            flex-direction: column;
+
+            .folder-box-dan {
+                width: 90px;
+                height: 90px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                >svg {
+                    font-size: 48px;
+                }
+
+                >div {
+                    color: #000;
+                    max-width: 80px;
+                    border-radius: 6px;
+                }
+            }
+
+            // 选中的样式
+            .select-folder {
+                >div {
+                    background-color: $textBg;
+                    color: #fff;
+                }
+            }
+        }
+
+        // 拖拽文件夹样式
+        .folder {
+            position: absolute;
+            background: $boxBgWhite;
+            overflow: hidden;
+            box-shadow: 0 0 10px $boxS;
+            display: flex;
+            flex-direction: column;
+
+            // 顶层信息栏
+            .top {
+                width: 100%;
+                cursor: move;
+                height: 40px;
+                box-shadow: 0 10px 10px $boxBg;
+
+                >div:first-child {
+                    flex: 0 0 200px;
+                }
+
+                >div:last-child {
+                    flex: 1;
+                }
+            }
+
+            // 文件窗口主体部分
+            .main {
+                >div:first-child {
+                    flex: 0 0 200px;
+                    overflow: auto;
+                }
+
+                >div:last-child {
+                    flex: 1;
+                    overflow: auto;
+                    background: $boxBg;
+                }
+            }
+
+            .main {
+                flex: 1;
+            }
+
+            // 窗口大小改变条 --start
+            .moveR {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 5px;
+                cursor: w-resize;
+            }
+
+            .moveB {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 5px;
+                cursor: n-resize;
+            }
+
+            .moveA {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 12px;
+                height: 12px;
+                cursor: nw-resize;
+                font-size: 14px;
+                color: #555;
+
+                >svg {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+            }
+
+            // 窗口大小改变条 --end
         }
 
         // 网页端云盘通用样式 --start
-        // 拖拽文件夹样式
-        .folder {
-            background: $boxBg;
-        }
-
         // 容器的基本样式
         .box {
             border: 1px solid $boxBorder;
@@ -62,6 +206,33 @@ $mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
             background: $mosha;
             backdrop-filter: blur(30px);
             box-shadow: rgb(16 16 16 / 30%) 0px 4px 10px;
+        }
+
+        // 弹跳样式
+        .jump:hover>div {
+            animation: animateJump 1s ease-out alternate;
+        }
+
+        @keyframes animateJump {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            25% {
+                transform: translate(0, -50%);
+            }
+
+            50% {
+                transform: translate(0, 0);
+            }
+
+            75% {
+                transform: translate(0, -20%);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
         }
 
         // 网页端云盘通用样式 --end
