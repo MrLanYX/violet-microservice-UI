@@ -2,15 +2,20 @@
     <div class="indexWin" @contextmenu="rightClick">
         <div class="bottom-nav box ms flex -l- px32">
             <div class="pl5 flex -l-">
-                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面"></iconfont>
+                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心"></iconfont>
+                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
                 <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
-            <div class="flex">1</div>
+            <div class="flex">
+                <el-divider direction="vertical"></el-divider>
+                <iconfont v-for="(item,i) in folders" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.name" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
+                <el-divider direction="vertical"></el-divider>
+            </div>
             <div class="pr10 flex -l-">
+                <iconfont size="40" icon="#iconHdonghua-xiangzuozhankai" bg="#eee" text="服务列表"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <timer></timer>
-                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心"></iconfont>
             </div>
         </div>
         <div class="folder-box">
@@ -23,7 +28,7 @@
                 </div>
             </div>
         </div>
-        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open="item.open"></folder>
+        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open"></folder>
     </div>
 </template>
 
@@ -165,6 +170,13 @@
                 if (!val.desktop) { // 桌面文件夹选中
                     this.selectKey = null
                 }
+            },
+            // 回到桌面
+            goDock() {
+                this.clearClick({})
+                this.folders.forEach(n => {
+                    n.open = false
+                });
             },
         },
         mounted() {

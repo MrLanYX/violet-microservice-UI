@@ -1,12 +1,30 @@
 <template>
-    <div :class="{input:open}" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
-        <div class="top flex pl5 pt5 pr5 pb5" @mousedown="mouseDownMove = true">
+    <div :class="open?'input':'out'" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
+        <div class="top flex pl5 pt5 pr5 pb5 l-l-l">
             <div>工具</div>
-            <div>文件夹名字</div>
+            <div @mousedown="mouseDownMove = true" class="oto">文件夹名字</div>
+            <div>
+                <i class="el-icon-close" @click="close"></i>
+            </div>
         </div>
-        <div class="main flex l-l pl5">
-            <div>1</div>
-            <div>内容</div>
+        <div class="main flex l-l pl10 pr5 pb5">
+            <div class="pt10 pr10">
+                <div v-for="item in typeClass" :key="item.id" class="pl10 pt10 pb10 oto mb10" :class="{select:selectTypeClass==item.id}" @click="selectTypeClass==item.id?selectTypeClass=-1:selectTypeClass=item.id">
+                    {{item.label}}
+                </div>
+            </div>
+            <div>
+                <el-table :data="tableData" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
+                    <el-table-column show-overflow-tooltip prop="date" label="文件类型">
+                    </el-table-column>
+                    <el-table-column show-overflow-tooltip prop="name" label="文件名">
+                    </el-table-column>
+                    <el-table-column show-overflow-tooltip prop="address" label="上传日期">
+                    </el-table-column>
+                    <el-table-column show-overflow-tooltip prop="address" label="大小">
+                    </el-table-column>
+                </el-table>
+            </div>
         </div>
 
         <div class="moveR" @mousedown="mouseDownWidth = true"></div>
@@ -36,6 +54,77 @@
                 mouseDownHeight: false, // 高度标识开关
                 mouseX: 0, // 鼠标x位置
                 mouseY: 0, // 鼠标y位置
+                tableData: [{
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1518 弄'
+                }, {
+                    date: '2016-05-04',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1517 弄'
+                }, {
+                    date: '2016-05-01',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1519 弄'
+                }, {
+                    date: '2016-05-03',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1516 弄'
+                }, {
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1518 弄'
+                }, {
+                    date: '2016-05-04',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1517 弄'
+                }, {
+                    date: '2016-05-01',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1519 弄'
+                }, {
+                    date: '2016-05-03',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1516 弄'
+                }, {
+                    date: '2016-05-02',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1518 弄'
+                }, {
+                    date: '2016-05-04',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1517 弄'
+                }, {
+                    date: '2016-05-01',
+                    name: '王小虎',
+                    address: '上海市普陀区金沙江路 1519 弄'
+                }, {
+                    date: '2016-05-03',
+                    name: '王',
+                    address: '上海市普陀区金沙江路 1516 弄'
+                }],
+                typeClass: [{ //文件类型分类
+                    id: 1,
+                    label: "文件夹",
+                    value: "folder",
+                }, {
+                    id: 2,
+                    label: "视频",
+                    value: "movie",
+                }, {
+                    id: 3,
+                    label: "PNG",
+                    value: "png",
+                }, {
+                    id: 4,
+                    label: "JPG",
+                    value: "jpg",
+                }, {
+                    id: 5,
+                    label: "PDF",
+                    value: "pdf",
+                }, ],
+                selectTypeClass:-1,// 选中的分类
             }
         },
         methods: {
@@ -72,7 +161,11 @@
             addZindex() {
                 this.styles.zIndex = ++this.$parent.zIndex
                 this.$parent.clearClick({})
-            }
+            },
+            // 关闭窗口
+            close() {
+                this.$emit("update:open", false)
+            },
         },
         mounted() {
             window.addEventListener("mousemove", this.moveMouse);

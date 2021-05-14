@@ -5,6 +5,7 @@ $text:#000; // 文字颜色
 $textHover:#fff; // 文字鼠标经过色
 $textHoverBg:#c0fefc; // 文字经过背景色
 $textBg:#77acf1; // 文字选中背景色
+$textBg2:#04009a; // 文字选中背景色深色
 $mosha:rgba(235, 235, 235, 0.42); // 磨砂背景色
 $boxS:#555; // 盒子阴影
 
@@ -68,6 +69,7 @@ $boxS:#555; // 盒子阴影
 
             // 当前时间
             .timer {
+                width: 65px;
                 font-weight: 700;
             }
         }
@@ -97,7 +99,7 @@ $boxS:#555; // 盒子阴影
                 }
 
                 >div {
-                    color: #000;
+                    color: $text;
                     max-width: 80px;
                     border-radius: 6px;
                 }
@@ -107,7 +109,7 @@ $boxS:#555; // 盒子阴影
             .select-folder {
                 >div {
                     background-color: $textBg;
-                    color: #fff;
+                    color: $textHover;
                 }
             }
         }
@@ -124,35 +126,60 @@ $boxS:#555; // 盒子阴影
             // 顶层信息栏
             .top {
                 width: 100%;
-                cursor: move;
                 height: 40px;
-                box-shadow: 0 10px 10px $boxBg;
-
+                box-shadow: 0 5px 5px $boxBg;
+                z-index: 9;
+                // 后退工具栏
                 >div:first-child {
                     flex: 0 0 200px;
                 }
-
-                >div:last-child {
+                // 文件窗口名
+                >div:nth-child(2) {
+                    cursor: move;
                     flex: 1;
                 }
             }
 
             // 文件窗口主体部分
             .main {
+                flex: 1;
+                height: 0;
+
+                // 分类栏
                 >div:first-child {
                     flex: 0 0 200px;
-                    overflow: auto;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    >div{
+                        background: $boxBg;
+                        border-radius: 6px;
+                        transition-duration: .5s;
+                        &:hover{
+                            color: $textHover;
+                            background: $textBg;
+                        }
+                    }
+                    .select{
+                        color: $textHover;
+                        background: $textBg;
+                    }
                 }
 
+                // 主要内容栏
                 >div:last-child {
                     flex: 1;
-                    overflow: auto;
+                    width: 0;
                     background: $boxBg;
-                }
-            }
 
-            .main {
-                flex: 1;
+                    // 选中样式 由element生成
+                    .current-row {
+                        td {
+                            color: $boxBg;
+                            background: $textBg;
+                            border-color: $textBg;
+                        }
+                    }
+                }
             }
 
             // 窗口大小改变条 --start
@@ -191,7 +218,52 @@ $boxS:#555; // 盒子阴影
                 }
             }
 
+            // 去掉表格背景
+            .el-table {
+                background: none;
+            }
+
             // 窗口大小改变条 --end
+        }
+
+        // 文件夹进入动画
+        .input {
+            animation: animateInput .5s ease-out both alternate;
+            /*动画: 名称 时间 线性 循环 播放完回退播放*/
+        }
+
+        @keyframes animateInput {
+            0% {
+                transform: scale(0.5, 0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1, 1);
+                opacity: 1;
+            }
+        }
+
+        // 文件夹离开动画
+        .out {
+            animation: animateOut .7s ease-out both alternate;
+            /*动画: 名称 时间 线性 循环 播放完回退播放*/
+        }
+
+        @keyframes animateOut {
+            0% {
+                transform: scale(1, 1) translate(0, 0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(0.5, 0.5) translate(0, 100px);
+            }
+
+            100% {
+                transform: scale(0.5, 0.5) translate(0, 2000px);
+                opacity: 0;
+            }
         }
 
         // 网页端云盘通用样式 --start
