@@ -2,20 +2,30 @@
     <div class="indexWin" @contextmenu="rightClick">
         <div class="bottom-nav box ms flex -l- px32">
             <div class="pl5 flex -l-">
-                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心"></iconfont>
                 <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
+                <iconfont size="40" icon="#iconfenxiang" bg="#eee" text="分享管理"></iconfont>
                 <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
-            <div class="flex">
+            <div class="flex" v-show="folders.length!=0">
                 <el-divider direction="vertical"></el-divider>
                 <iconfont v-for="(item,i) in folders" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.name" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
             <div class="pr10 flex -l-">
-                <iconfont size="40" icon="#iconHdonghua-xiangzuozhankai" bg="#eee" text="服务列表"></iconfont>
+                <transition name="draw">
+                    <div class="server-list" v-show="routerList" :style="'width:'+50*routes.length+'px'">
+                        <div v-for="(item,i) in routes" class="ml5 mr5 px26" :key="i" :title="item.meta.title">
+                            <el-tooltip class="item" effect="dark" :content="item.meta.title" placement="top">
+                                <svg-icon :icon-class="item.meta.icon" />
+                            </el-tooltip>
+                        </div>
+                    </div>
+                </transition>
+                <iconfont size="40" :icon="routerList?'#iconxiangyouzhankai':'#iconHdonghua-xiangzuozhankai'" bg="#eee" text="服务列表" @click="routerList=!routerList"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <timer></timer>
+                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="messageFalg=!messageFalg"></iconfont>
             </div>
         </div>
         <div class="folder-box">
@@ -28,7 +38,12 @@
                 </div>
             </div>
         </div>
-        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open"></folder>
+        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del" @del="folders.splice(i,1)"></folder>
+        <transition name="draw">
+            <div class="message-box ms box pl10 pr0 pt10 pb10" v-show="messageFalg">
+                1
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -119,10 +134,15 @@
                         id: 25,
                         name: "文件4",
                     }, ]
-                }, ],
+                }, {
+                    id: 3,
+                    name: "文件",
+                }],
                 selectKey: null,
                 folders: [],
                 zIndex: 1, // 默认文件夹层级
+                routerList: false, //服务列表的显示开关
+                messageFalg: false, // 消息栏开关
             }
         },
         methods: {
@@ -135,7 +155,8 @@
                 let option = { // 当前打开的文件夹列表
                     datas: item, // 当前文件夹数据
                     // selectKey: "", // 当前单选中的文件id
-                    open: true, // 是否打开显示在桌面
+                    open: false, // 是否打开显示在桌面
+                    del: false, // 控制文件夹删除动画 通过与open配合控制三个状态 1.文件夹创建打开动画 2.文件夹小化动画 3.文件夹删除动画
                     style: {
                         top: 100, // 文件的顶部距离
                         left: 100, // 文件的左部距离
@@ -170,6 +191,8 @@
                 if (!val.desktop) { // 桌面文件夹选中
                     this.selectKey = null
                 }
+                // 服务列表收起
+                // 消息栏收起
             },
             // 回到桌面
             goDock() {
@@ -187,7 +210,9 @@
         },
         computed: {
             routes() {
-                //     return this.$store.getters.permission_routes
+                let all = this.$store.getters.permission_routes
+                let router = all.find(n => n.name == "ParentView")
+                return router.children
             }
         },
         filters: {

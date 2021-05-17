@@ -50,6 +50,21 @@ $boxS:#555; // 盒子阴影
             >div:last-child {
                 position: absolute;
                 right: 0;
+
+                .server-list {
+                    overflow: hidden;
+
+                    >div {
+                        width: 40px;
+                        height: 40px;
+                        background: rgb(238, 238, 238);
+                        border-radius: 10px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                }
+
             }
 
             // 纵向分割线
@@ -86,6 +101,7 @@ $boxS:#555; // 盒子阴影
             align-content: flex-start;
             flex-direction: column;
 
+            // 单个文件夹
             .folder-box-dan {
                 width: 90px;
                 height: 90px;
@@ -129,14 +145,43 @@ $boxS:#555; // 盒子阴影
                 height: 40px;
                 box-shadow: 0 5px 5px $boxBg;
                 z-index: 9;
+
                 // 后退工具栏
                 >div:first-child {
                     flex: 0 0 200px;
                 }
+
                 // 文件窗口名
                 >div:nth-child(2) {
                     cursor: move;
                     flex: 1;
+                }
+            }
+
+            // 文件夹工具区域
+            .tool {
+                .left {
+                    border-radius: 10px 0 0 10px;
+                }
+
+                .center {
+                    height: 100%;
+                    width: 2px;
+                    background: $boxBorder;
+                }
+
+                .right {
+                    border-radius: 0 10px 10px 0;
+                }
+
+                .left,
+                .right {
+                    background: $boxBg;
+                    transition-duration: .5s;
+
+                    &:hover {
+                        background: $boxBorder;
+                    }
                 }
             }
 
@@ -150,16 +195,19 @@ $boxS:#555; // 盒子阴影
                     flex: 0 0 200px;
                     overflow-x: hidden;
                     overflow-y: auto;
-                    >div{
+
+                    >div {
                         background: $boxBg;
                         border-radius: 6px;
                         transition-duration: .5s;
-                        &:hover{
+
+                        &:hover {
                             color: $textHover;
                             background: $textBg;
                         }
                     }
-                    .select{
+
+                    .select {
                         color: $textHover;
                         background: $textBg;
                     }
@@ -226,6 +274,17 @@ $boxS:#555; // 盒子阴影
             // 窗口大小改变条 --end
         }
 
+        // 消息栏区域
+        .message-box {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            bottom: 85px;
+            width: 320px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
         // 文件夹进入动画
         .input {
             animation: animateInput .5s ease-out both alternate;
@@ -245,7 +304,8 @@ $boxS:#555; // 盒子阴影
         }
 
         // 文件夹离开动画
-        .out {
+        .out,
+        .del-out {
             animation: animateOut .7s ease-out both alternate;
             /*动画: 名称 时间 线性 循环 播放完回退播放*/
         }
@@ -264,6 +324,17 @@ $boxS:#555; // 盒子阴影
                 transform: scale(0.5, 0.5) translate(0, 2000px);
                 opacity: 0;
             }
+        }
+
+        // 展开收起动画
+        .draw-enter-active,
+        .draw-leave-active {
+            transition: all .7s ease;
+        }
+
+        .draw-enter,
+        .draw-leave-to {
+            width: 0 !important;
         }
 
         // 网页端云盘通用样式 --start
