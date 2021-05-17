@@ -285,6 +285,13 @@ $boxS:#555; // 盒子阴影
             overflow-x: hidden;
         }
 
+        // 右键菜单
+        .right-click-menu{
+            width: 200px;
+            height: 400px;
+            position: absolute;
+        }
+
         // 文件夹进入动画
         .input {
             animation: animateInput .5s ease-out both alternate;
@@ -304,8 +311,7 @@ $boxS:#555; // 盒子阴影
         }
 
         // 文件夹离开动画
-        .out,
-        .del-out {
+        .out{
             animation: animateOut .7s ease-out both alternate;
             /*动画: 名称 时间 线性 循环 播放完回退播放*/
         }

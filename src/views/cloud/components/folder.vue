@@ -1,5 +1,5 @@
 <template>
-    <div :class="newclass" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
+    <div :class="open?'input':'out'" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
         <div class="top flex pl5 pt5 pr5 pb5 l-l-l">
             <div class="tool px30 pl5 pr10 flex l-l">
                 <svg class="icon" aria-hidden="true">
@@ -140,7 +140,7 @@
                     value: "pdf",
                 }, ],
                 selectTypeClass: -1, // 选中的分类
-                newclass: "",
+                // newclass: "",
             }
         },
         methods: {
@@ -188,45 +188,15 @@
             },
             // 删除窗口
             del() {
+                this.$emit("update:open", false)
                 this.$emit("update:delFlag", false)
-                setTimeout(() => {
-                    this.$emit("del")
-                }, 1000);
             }
         },
         mounted() {
-            // 进入后1秒锁定文件夹存在状态
-            this.$emit("update:open", true)
-            setTimeout(() => {
-                this.$emit("update:delFlag", true)
-            }, 1000);
             window.addEventListener("mousemove", this.moveMouse);
             window.addEventListener("mouseup", this.mouseUp);
         },
         watch: {
-            // 返回文件夹应该有的动画
-            open(newVal) {
-                if (newVal) {
-                    // console.log(this.open, this.delFlag);
-                    // console.log("open假变真，加input");
-                    this.newclass = "input"
-                } else {
-                    // console.log(this.open, this.delFlag);
-                    // console.log("open真变假，加out");
-                    this.newclass = "out"
-                }
-            },
-            delFlag(newVal) {
-                if (newVal) {
-                    // console.log(this.open, this.delFlag);
-                    // console.log("delFlag假变真，删除input");
-                    this.newclass = ""
-                } else {
-                    // console.log(this.open, this.delFlag);
-                    // console.log("delFlag真变假，加out，删除");
-                    this.newclass = "out"
-                }
-            },
         },
         computed: {},
         filters: {

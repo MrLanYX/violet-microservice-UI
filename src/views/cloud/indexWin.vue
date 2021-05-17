@@ -1,5 +1,5 @@
 <template>
-    <div class="indexWin" @contextmenu="rightClick">
+    <div class="indexWin" @contextmenu="clearRightClick">
         <div class="bottom-nav box ms flex -l- px32">
             <div class="pl5 flex -l-">
                 <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
@@ -7,15 +7,15 @@
                 <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
-            <div class="flex" v-show="folders.length!=0">
+            <div class="flex" v-show="folders.findIndex(n=>n.del==true)!=-1">
                 <el-divider direction="vertical"></el-divider>
-                <iconfont v-for="(item,i) in folders" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.name" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
+                <iconfont v-for="(item,i) in folders" v-show="item.del" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.name" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
             <div class="pr10 flex -l-">
                 <transition name="draw">
                     <div class="server-list" v-show="routerList" :style="'width:'+50*routes.length+'px'">
-                        <div v-for="(item,i) in routes" class="ml5 mr5 px26" :key="i" :title="item.meta.title">
+                        <div v-for="(item,i) in routes" class="ml5 mr5 px26" :key="i">
                             <el-tooltip class="item" effect="dark" :content="item.meta.title" placement="top">
                                 <svg-icon :icon-class="item.meta.icon" />
                             </el-tooltip>
@@ -28,8 +28,8 @@
                 <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="messageFalg=!messageFalg"></iconfont>
             </div>
         </div>
-        <div class="folder-box">
-            <div class="folder-box-dan" :class="{'select-folder':item.id==selectKey}" v-for="item in datas" :key="item.id" @click="clickFolder(item.id)" @dblclick="dbClickFolder(item)">
+        <div class="folder-box" @mousedown="clearClick">
+            <div class="folder-box-dan" :class="{'select-folder':item.id==selectKey}" v-for="item in datas" :key="item.id" @click="clickFolder(item.id)" @dblclick="dbClickFolder(item)" @contextmenu="contextmenu('desktopFolder',$event,item)">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#iconwenjianjia"></use>
                 </svg>
@@ -38,12 +38,13 @@
                 </div>
             </div>
         </div>
-        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del" @del="folders.splice(i,1)"></folder>
+        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del"></folder>
         <transition name="draw">
             <div class="message-box ms box pl10 pr0 pt10 pb10" v-show="messageFalg">
                 1
             </div>
         </transition>
+        <div class="box right-click-menu ms" v-show="rightClickFlag" @click="clearClick" :style="'top:'+rightClickTop+'px;left:'+rightClickLeft+'px'">1</div>
     </div>
 </template>
 
@@ -143,6 +144,9 @@
                 zIndex: 1, // 默认文件夹层级
                 routerList: false, //服务列表的显示开关
                 messageFalg: false, // 消息栏开关
+                rightClickTop: 0, // 右键菜单定位
+                rightClickLeft: 0, // 右键菜单定位
+                rightClickFlag: false, // 控制右键菜单显隐
             }
         },
         methods: {
@@ -155,8 +159,8 @@
                 let option = { // 当前打开的文件夹列表
                     datas: item, // 当前文件夹数据
                     // selectKey: "", // 当前单选中的文件id
-                    open: false, // 是否打开显示在桌面
-                    del: false, // 控制文件夹删除动画 通过与open配合控制三个状态 1.文件夹创建打开动画 2.文件夹小化动画 3.文件夹删除动画
+                    open: true, // 是否打开显示在桌面
+                    del: true, // 控制文件夹删除动画 通过与open配合控制三个状态 1.文件夹创建打开动画 2.文件夹小化动画 3.文件夹删除动画
                     style: {
                         top: 100, // 文件的顶部距离
                         left: 100, // 文件的左部距离
@@ -169,6 +173,7 @@
                 if (i != -1) {
                     this.folders[i].style.zIndex = ++this.zIndex
                     this.folders[i].open = true
+                    this.folders[i].del = true
                 } else {
                     // 找到最上层窗口叠加位置
                     let i = this.folders.findIndex(n => n.style.zIndex == this.zIndex)
@@ -182,7 +187,7 @@
                 }
             },
             // 右键菜单
-            rightClick() {
+            clearRightClick() {
                 window.event.returnValue = false;
             },
             // 整个桌面系统的单击操作状态清除
@@ -191,8 +196,15 @@
                 if (!val.desktop) { // 桌面文件夹选中
                     this.selectKey = null
                 }
-                // 服务列表收起
-                // 消息栏收起
+                if (!val.serverList) { // 服务列表收起
+                    this.routerList = false
+                }
+                if (!val.message) { // 消息栏收起
+                    this.messageFalg = false
+                }
+                if (!val.right) { // 右键菜单
+                    this.rightClickFlag = false
+                }
             },
             // 回到桌面
             goDock() {
@@ -201,13 +213,21 @@
                     n.open = false
                 });
             },
+            // 管理所有的右键操作
+            contextmenu(type, e, val) {
+                this.rightClickFlag = true
+                if (type == 'desktopFolder') { // 桌面文件夹右键
+                    console.log(val);
+                    console.log(e);
+                    this.rightClickLeft = e.pageX
+                    this.rightClickTop = e.pageY
+                }
+            },
         },
         mounted() {
             console.log(this.routes);
         },
-        watch: {
-
-        },
+        watch: {},
         computed: {
             routes() {
                 let all = this.$store.getters.permission_routes
