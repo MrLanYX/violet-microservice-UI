@@ -55,7 +55,7 @@ $boxS:#555; // 盒子阴影
                     overflow: hidden;
 
                     >div {
-                        width: 40px;
+                        flex: 0 0 40px;
                         height: 40px;
                         background: rgb(238, 238, 238);
                         border-radius: 10px;
@@ -182,6 +182,10 @@ $boxS:#555; // 盒子阴影
                     &:hover {
                         background: $boxBorder;
                     }
+
+                    &.mouse-no {
+                        background: $boxBg;
+                    }
                 }
             }
 
@@ -281,15 +285,51 @@ $boxS:#555; // 盒子阴影
             right: 15px;
             bottom: 85px;
             width: 320px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden;
+
+            // 卡片容器
+            >div {
+                width: 324px;
+                height: 100%;
+                overflow-x: hidden;
+                overflow-y: scroll;
+            }
+
+            // 每条消息本体
+            .message-box-card {
+                width: 100%;
+                height: auto;
+                background: #ffffff40;
+                border-radius: 10px;
+                overflow: hidden;
+
+                // 消息标题
+                .message-box-title {
+                    background: #ffffff20;
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            @keyframes cardIpnut {
+                0% {
+                    transform: translate(310px, 0);
+                }
+
+                100% {
+                    transform: translate(0, 0);
+                }
+            }
         }
 
         // 右键菜单
-        .right-click-menu{
+        .right-click-menu {
             width: 200px;
             height: 400px;
             position: absolute;
+            background: $boxBg;
         }
 
         // 文件夹进入动画
@@ -311,7 +351,7 @@ $boxS:#555; // 盒子阴影
         }
 
         // 文件夹离开动画
-        .out{
+        .out {
             animation: animateOut .7s ease-out both alternate;
             /*动画: 名称 时间 线性 循环 播放完回退播放*/
         }

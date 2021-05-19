@@ -21,6 +21,9 @@
             }
         },
         methods: {
+            /**
+             * 时间初始化
+             */
             initData() {
                 this.timer = setInterval(() => {
                     this.day=new Date().toLocaleDateString()

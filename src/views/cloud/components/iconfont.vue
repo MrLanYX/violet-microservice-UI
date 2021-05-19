@@ -20,6 +20,9 @@
             text: String,
         },
         methods:{
+            /**
+             * 点击图标向上注册事件
+             */
             click(){
                 this.$emit("click")
             }
