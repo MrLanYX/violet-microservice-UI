@@ -332,7 +332,7 @@
         watch: {},
         computed: {
             routes() {
-                // let all = this.$store.getters.permission_routes
+                let all = this.$store.getters.permission_routes
                 let router1 = all.find(n => n.name == "ParentView")
                 let router2 = all.find(n => n.redirect == "index")
                 let routers = router1.children.concat(router2.children)
