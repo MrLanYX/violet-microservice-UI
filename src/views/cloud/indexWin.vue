@@ -301,7 +301,6 @@
              */
             findFolder() {
                 let j = -1
-                this.contextmenu()
                 let zindex = 0
                 this.folders.forEach((n, i) => {
                     if (n.open && n.style.zIndex > zindex) {
