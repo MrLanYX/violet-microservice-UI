@@ -30,8 +30,8 @@
                     {{item.label}}
                 </div>
             </div>
-            <div>
-                <el-table :data="obj.children" @row-dblclick="dbClickRow" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
+            <div @contextmenu="tableRightClick">
+                <el-table :data="obj.children" @row-dblclick="dbClickRow" @row-contextmenu="itemRightClick" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
                     <el-table-column show-overflow-tooltip prop="type" label="文件类型">
                     </el-table-column>
                     <el-table-column show-overflow-tooltip prop="name" label="文件名">
@@ -276,6 +276,18 @@
                     this.$emit("update:obj", this.historyArr[i + 1])
                     this.selectTypeClass = -1
                 }
+            },
+            /**
+             * 文件夹内表格右键
+             */
+            itemRightClick(row, column, e){
+                this.$parent.rightMenu(e,'tablesItem',row)
+            },
+            /**
+             * 表格整个右键
+             */
+            tableRightClick(e){
+                this.$parent.rightMenu(e,'tables',this.obj)
             },
         },
         mounted() {

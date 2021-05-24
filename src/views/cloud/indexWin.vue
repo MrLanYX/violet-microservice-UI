@@ -31,8 +31,8 @@
         </div>
 
 
-        <div class="folder-box" @mousedown="clearClickFun">
-            <div class="folder-box-dan" :class="{'select-folder':item.id==selectKey}" v-for="item in datas" :key="item.id" @mousedown="clickFolder($event,item.id)" @dblclick="dbClickFolder(item)" @contextmenu="contextmenu($event,'desktopFolder',item)">
+        <div class="folder-box" @mousedown="clearClickFun" @contextmenu="rightMenu($event,'desktop')">
+            <div class="folder-box-dan" :class="{'select-folder':item.id==selectKey}" v-for="item in datas" :key="item.id" @mousedown="clickFolder($event,item.id)" @dblclick="dbClickFolder(item)" @contextmenu="rightMenu($event,'desktopFolder',item)">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#iconwenjianjia"></use>
                 </svg>
@@ -57,8 +57,10 @@
             </div>
         </transition>
 
-        
-        <div class="box right-click-menu" v-show="rightClickFlag" @click="clearClickFun" :style="'top:'+rightClickTop+'px;left:'+rightClickLeft+'px'">1</div>
+
+        <div class="box right-click-menu pt5 pb5" v-show="rightClickFlag" :style="'top:'+rightClickTop+'px;left:'+rightClickLeft+'px'">
+            <div v-for="(item,i) in rightClickList" :key="i" class="text-align-l pt5 pl10 pr20 pb5 oto" :class="{'disable':!item.show}" @click="rightMenuClick($event,item)">{{item.dictLabel}}</div>
+        </div>
     </div>
 </template>
 
@@ -127,14 +129,14 @@
                         type: "文件夹",
                         date: "2021.5.19",
                         size: "10MB",
-                        children:[],
+                        children: [],
                     }, {
                         id: 13,
                         name: "文件夹一的文件夹三",
                         type: "文件夹",
                         date: "2021.5.19",
                         size: "10MB",
-                        children:[],
+                        children: [],
                     }, {
                         id: 14,
                         name: "文件3",
@@ -196,6 +198,9 @@
                 rightClickTop: 0, // 右键菜单定位
                 rightClickLeft: 0, // 右键菜单定位
                 rightClickFlag: false, // 控制右键菜单显隐
+                rightClickList: [], // 右键菜单列表
+                rightClickData: {}, //右击目标的数据
+                rightClickType: "", // 右击目标的类型
             }
         },
         methods: {
@@ -253,7 +258,7 @@
                 }
             },
             /**
-             * 右键菜单
+             * 清除系统自带右键菜单
              */
             clearRightClick() {
                 window.event.returnValue = false;
@@ -269,7 +274,7 @@
                 if (!val.serverList) { // 服务列表收起
                     this.routerList = false
                 }
-                if (!val.message) { // 消息栏收起
+                if (!val.message) { // 消息栏收起      
                     this.messageFalg = false
                 }
                 if (!val.right) { // 右键菜单
@@ -288,12 +293,63 @@
             /**
              * 管理所有的右键操作
              */
-            contextmenu(e, type, val) {
-                this.rightClickFlag = true
+            rightMenu(e, type, val) {
+                this.rightClickList.forEach(n => n.show = true) // 全部选项恢复默认开启
+                this.rightClickLeft = e.pageX // 调整位置
+                this.rightClickTop = e.pageY
+                this.rightClickFlag = true // 开启窗口
+                this.rightClickData = {} // 清空右击数据
+                this.rightClickType = type // 增加右击目标类型
                 if (type == 'desktopFolder') { // 桌面文件夹右键
-                    console.log(val);
-                    this.rightClickLeft = e.pageX
-                    this.rightClickTop = e.pageY
+                    this.rightClickData = val // 清空右击数据
+                    this.rightClickList[1].show = this.rightClickList[2].show = false
+                }
+                if (type == 'tablesItem') { // 文件夹内单行右键
+                    this.rightClickData = val // 清空右击数据
+                    this.rightClickList[1].show = this.rightClickList[2].show = false
+                }
+                if (type == 'tables') { // 文件夹整体右键
+                    this.rightClickData = val // 清空右击数据
+                    this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                }
+                if (type == 'desktop' && e.path[0].className == "folder-box") { // 桌面右键
+                    console.log(e);
+                    this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                }
+            },
+            /**
+             * 右键菜单的单击选择
+             */
+            rightMenuClick(e, val) {
+                if (val.show) {
+                    this.clearClickFun({})
+                    if (val.dictValue == "F5") {
+                        console.log("刷新数据");
+                    }
+                    if (val.dictValue == "name") {
+                        console.log("重命名");
+                    }
+                    if (val.dictValue == "del") {
+                        console.log("删除操作");
+                    }
+                    if (val.dictValue == "share") {
+                        console.log("分享");
+                    }
+
+
+                    if (this.rightClickType == "desktopFolder" && val.dictValue == "open") {
+                        console.log("桌面文件夹打开");
+                        this.dbClickFolder(this.rightClickData)
+                    }
+
+
+                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.type == "文件夹") {
+                        console.log("文件夹内文件夹打开");
+                        this.dbClickFolder(this.rightClickData)
+                    }
+                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.type == "文件") {
+                        console.log("文件夹内文件打开");
+                    }
                 }
             },
             /**
@@ -327,6 +383,10 @@
         },
         mounted() {
             console.log(this.routes);
+            this.getDicts("cloud_right_click_list").then(response => {
+                this.rightClickList = response.data;
+                this.rightClickList.forEach(n => n.show = true)
+            });
         },
         watch: {},
         computed: {

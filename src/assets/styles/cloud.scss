@@ -326,10 +326,22 @@ $boxS:#555; // 盒子阴影
 
         // 右键菜单
         .right-click-menu {
-            width: 200px;
-            height: 400px;
+            width: auto;
+            height: auto;
             position: absolute;
             background: $boxBg;
+            overflow: hidden;
+            z-index: 99;
+
+            >div:hover {
+                background: $textBg;
+            }
+
+            .disable {
+                color: #999;
+                cursor: not-allowed;
+                background: $boxBg !important;
+            }
         }
 
         // 文件夹进入动画
