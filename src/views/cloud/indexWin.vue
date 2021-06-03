@@ -10,7 +10,7 @@
             </div>
             <div class="flex" v-show="folders.findIndex(n=>n.del==true)!=-1">
                 <el-divider direction="vertical"></el-divider>
-                <iconfont v-for="(item,i) in folders" v-show="item.del" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.name" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
+                <iconfont v-for="(item,i) in folders" v-show="item.del" :key="i" size="40" icon="#iconwenjianjia" bg="#eee" :text="item.datas.sourceName" @click="item.open=true;item.style.zIndex=++zIndex"></iconfont>
                 <el-divider direction="vertical"></el-divider>
             </div>
             <div class="pr10 flex -l-">
@@ -36,8 +36,8 @@
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#iconwenjianjia"></use>
                 </svg>
-                <div class="mt5 pl5 pt3 pr5 pb3 ms px14 oto" :title="item.name">
-                    {{item.name}}
+                <div class="mt5 pl5 pt3 pr5 pb3 ms px14 oto" :title="item.sourceName">
+                    {{item.sourceName}}
                 </div>
             </div>
         </div>
@@ -61,13 +61,21 @@
         <div class="box right-click-menu pt5 pb5" v-show="rightClickFlag" :style="'top:'+rightClickTop+'px;left:'+rightClickLeft+'px'">
             <div v-for="(item,i) in rightClickList" :key="i" class="text-align-l pt5 pl10 pr20 pb5 oto" :class="{'disable':!item.show}" @click="rightMenuClick($event,item)">{{item.dictLabel}}</div>
         </div>
+
+        <el-upload style="display:none" action="Fake Action" multiple :limit="1" :auto-upload="false" :on-change="updata">
+            <el-button ref="uploadBtn" size="small" type="primary"></el-button>
+        </el-upload>
+
+		<newfolder ref="newfolder" @updata="initData"></newfolder>
     </div>
 </template>
 
 <script>
+    import { flieList,newFiles } from '@/api/center/cloud'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
+    import newfolder from './components/newfolder'
     export default {
         name: '',
         props: {},
@@ -75,6 +83,7 @@
             iconfont,
             timer,
             folder,
+			newfolder,
         },
         data() {
             return {
@@ -205,6 +214,19 @@
         },
         methods: {
             /**
+             * 初始化加载用户文件数据
+             */
+            initData() {
+                flieList().then(res => {
+                    console.log(res);
+                    this.datas = res.data
+                    // let data=JSON.stringify(res.data)
+                    // data=data.replace(/"createTime":/g , '"date":')
+                    // data=data.replace(/"fileSize":/g , '"size":')
+                    // this.datas=JSON.parse(data)
+                })
+            },
+            /**
              * 单选中文件夹
              */
             clickFolder(e, i) {
@@ -215,6 +237,7 @@
              * 双击打开文件夹
              */
             dbClickFolder(item) {
+                console.log(item);
                 let option = { // 当前打开的文件夹列表
                     datas: item, // 当前文件夹数据
                     open: true, // 是否打开显示在桌面
@@ -298,22 +321,27 @@
                 this.rightClickLeft = e.pageX // 调整位置
                 this.rightClickTop = e.pageY
                 this.rightClickFlag = true // 开启窗口
-                this.rightClickData = {} // 清空右击数据
-                this.rightClickType = type // 增加右击目标类型
-                if (type == 'desktopFolder') { // 桌面文件夹右键
-                    this.rightClickData = val // 清空右击数据
+                if (type != "desktop") { // 增加右击目标类型（过滤冒泡至桌面，桌面的类型在自己方法里面加）
+                    this.rightClickData = {} // 清空右击数据
+                    this.rightClickType = type
+                }
+                if (type == 'desktopFolder' && val) { // 桌面文件夹右键
+                    console.log(e, type, val);
+                    this.rightClickData = val
                     this.rightClickList[1].show = this.rightClickList[2].show = false
                 }
                 if (type == 'tablesItem') { // 文件夹内单行右键
-                    this.rightClickData = val // 清空右击数据
+                    this.rightClickData = val
                     this.rightClickList[1].show = this.rightClickList[2].show = false
                 }
                 if (type == 'tables') { // 文件夹整体右键
-                    this.rightClickData = val // 清空右击数据
+                    this.rightClickData = val
                     this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
                 }
                 if (type == 'desktop' && e.path[0].className == "folder-box") { // 桌面右键
                     console.log(e);
+                    this.rightClickData = { id: -1 }
+                    this.rightClickType = type
                     this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
                 }
             },
@@ -321,10 +349,12 @@
              * 右键菜单的单击选择
              */
             rightMenuClick(e, val) {
+                console.log(this.rightClickData, val);
                 if (val.show) {
                     this.clearClickFun({})
                     if (val.dictValue == "F5") {
                         console.log("刷新数据");
+                        this.initData()
                     }
                     if (val.dictValue == "name") {
                         console.log("重命名");
@@ -334,6 +364,14 @@
                     }
                     if (val.dictValue == "share") {
                         console.log("分享");
+                    }
+                    if (val.dictValue == "upload") {
+                        console.log("上传文件");
+                        this.$refs.uploadBtn.$el.click()
+                    }
+                    if (val.dictValue == "newFolder") {
+                        console.log("新建文件夹");
+                        this.$refs.newfolder.initData("add",this.rightClickData.id)
                     }
 
 
@@ -379,10 +417,32 @@
                         location.href = '/index';
                     })
                 })
-            }
+            },
+            /**
+             * 开始上传方法
+             */
+            updata(file, fileList) {
+                let formData = new FormData();
+				let params={
+					parentId:this.rightClickData.id,
+				}
+                Object.keys(params).forEach((key) => {
+                    if ("undefined" != typeof params[key] && params[key] != null) {
+                        formData.append(key, params[key]);
+                    }
+                });
+                if (fileList[0] != null) {
+                    formData.append("multipartFiles", fileList[0].raw);
+                }
+                console.log(11111);
+				newFiles(formData).then(res=>{
+					console.log(res);
+				})
+            },
         },
         mounted() {
-            console.log(this.routes);
+            // console.log(this.routes);
+            this.initData()
             this.getDicts("cloud_right_click_list").then(response => {
                 this.rightClickList = response.data;
                 this.rightClickList.forEach(n => n.show = true)

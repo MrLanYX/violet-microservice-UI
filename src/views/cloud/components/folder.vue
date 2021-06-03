@@ -15,7 +15,7 @@
                     </div>
                 </div>
             </div>
-            <div @mousedown="moveFolder" class="oto pl10 px18">{{obj.name}}</div>
+            <div @mousedown="moveFolder" class="oto pl10 px18">{{obj.sourceName}}</div>
             <div class="px24 flex -l-">
                 <i class="el-icon-minus mr5" @click="close"></i>
                 <i class="el-icon-copy-document mr5 px20" @click="big"></i>
@@ -32,13 +32,13 @@
             </div>
             <div @contextmenu="tableRightClick">
                 <el-table :data="obj.children" @row-dblclick="dbClickRow" @row-contextmenu="itemRightClick" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
-                    <el-table-column show-overflow-tooltip prop="type" label="文件类型">
+                    <el-table-column show-overflow-tooltip prop="fileType" label="文件类型">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="name" label="文件名">
+                    <el-table-column show-overflow-tooltip prop="sourceName" label="文件名">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="date" label="上传日期">
+                    <el-table-column show-overflow-tooltip prop="updateTime" label="上传日期">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="size" label="大小">
+                    <el-table-column show-overflow-tooltip prop="fileSize" label="大小">
                     </el-table-column>
                 </el-table>
             </div>
