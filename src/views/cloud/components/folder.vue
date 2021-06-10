@@ -56,6 +56,7 @@
 </template>
 
 <script>
+    import { getFilesByParentId } from '@/api/center/cloud'
     export default {
         name: '',
         props: {
@@ -64,9 +65,7 @@
             open: Boolean,
             delFlag: Boolean,
         },
-        components: {
-
-        },
+        components: {},
         data() {
             return {
                 mouseDownMove: false, // 移动标识开关
@@ -74,55 +73,7 @@
                 mouseDownHeight: false, // 高度标识开关
                 mouseX: 0, // 鼠标x位置
                 mouseY: 0, // 鼠标y位置
-                tableData: [{
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1517 弄'
-                }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1519 弄'
-                }, {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1516 弄'
-                }, {
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1517 弄'
-                }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1519 弄'
-                }, {
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1516 弄'
-                }, {
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-04',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1517 弄'
-                }, {
-                    date: '2016-05-01',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1519 弄'
-                }, {
-                    date: '2016-05-03',
-                    name: '王',
-                    address: '上海市普陀区金沙江路 1516 弄'
-                }],
+                tableData: [],
                 typeClass: [{ //文件类型分类
                     id: 1,
                     label: "文件夹",
@@ -145,11 +96,30 @@
                     value: "pdf",
                 }, ],
                 selectTypeClass: -1, // 选中的分类
-                oldData: {}, // 旧数据 全屏恢复用
+                oldData: {}, // 旧样式数据 全屏恢复用
                 historyArr: [], // 用于存储对文件夹的操作记录
             }
         },
         methods: {
+            /**
+             * 用于文件夹初始化刷新数据
+             */
+            async initData() {
+                console.log("文件夹刷新");
+                // 1.历史刷新
+                for (const key in this.historyArr) {
+                    if (Object.hasOwnProperty.call(this.historyArr, key)) {
+                        await getFilesByParentId(this.historyArr[key].id).then(res => {
+                            if (res.data.length==0) {
+                                this.historyArr[key]=null
+                            }
+                            this.historyArr[key]=res.data[0];
+                        })
+                    }
+                }
+                // 2.过滤空
+                // 3.当前重新赋值
+            },
             /**
              * 鼠标点下标题开启移动状态
              */
@@ -280,15 +250,21 @@
             /**
              * 文件夹内表格右键
              */
-            itemRightClick(row, column, e){
-                this.$parent.rightMenu(e,'tablesItem',row)
+            itemRightClick(row, column, e) {
+                this.$parent.rightMenu(e, 'tablesItem', row)
             },
             /**
              * 表格整个右键
              */
-            tableRightClick(e){
-                this.$parent.rightMenu(e,'tables',this.obj)
+            tableRightClick(e) {
+                this.$parent.rightMenu(e, 'tables', this.obj)
             },
+            /**
+             * 文件夹内进行回调刷新
+             */
+            updata() {
+                console.log("文件夹内部刷新");
+            }
         },
         mounted() {
             window.addEventListener("mousemove", this.moveMouse);
@@ -315,7 +291,7 @@
                 return [back, going]
             },
         },
-        filters: {}
+        filters: {},
     }
 </script>
 

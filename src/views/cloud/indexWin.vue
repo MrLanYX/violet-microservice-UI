@@ -43,7 +43,7 @@
         </div>
 
 
-        <folder v-for="(item,i) in folders" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
+        <folder v-for="(item,i) in folders" :ref="'folder'+i" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
 
 
         <transition name="draw">
@@ -66,12 +66,12 @@
             <el-button ref="uploadBtn" size="small" type="primary"></el-button>
         </el-upload>
 
-		<newfolder ref="newfolder" @updata="initData"></newfolder>
+        <newfolder ref="newfolder" @updata="initData"></newfolder>
     </div>
 </template>
 
 <script>
-    import { flieList,newFiles } from '@/api/center/cloud'
+    import { flieList, newFiles } from '@/api/center/cloud'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -83,122 +83,11 @@
             iconfont,
             timer,
             folder,
-			newfolder,
+            newfolder,
         },
         data() {
             return {
-                // 全部数据
-                datas: [{
-                    id: 1,
-                    name: "文件夹一",
-                    type: "文件夹",
-                    date: "2021.5.19",
-                    size: "10MB",
-                    children: [{
-                        id: 11,
-                        name: "文件夹一的文件夹一",
-                        type: "文件夹",
-                        date: "2021.5.19",
-                        size: "10MB",
-                        children: [{
-                            id: 111,
-                            name: "文件夹1",
-                            type: "文件",
-                            date: "2021.5.19",
-                            size: "10MB",
-                            children: []
-                        }, {
-                            id: 112,
-                            name: "文件1",
-                            type: "文件",
-                            date: "2021.5.19",
-                            size: "10MB",
-                        }, {
-                            id: 113,
-                            name: "文件2",
-                            type: "文件",
-                            date: "2021.5.19",
-                            size: "10MB",
-                        }, {
-                            id: 114,
-                            name: "文件3",
-                            type: "文件",
-                            date: "2021.5.19",
-                            size: "10MB",
-                        }, {
-                            id: 115,
-                            name: "文件4",
-                            type: "文件",
-                            date: "2021.5.19",
-                            size: "10MB",
-                        }, ]
-                    }, {
-                        id: 12,
-                        name: "文件夹一的文件夹二",
-                        type: "文件夹",
-                        date: "2021.5.19",
-                        size: "10MB",
-                        children: [],
-                    }, {
-                        id: 13,
-                        name: "文件夹一的文件夹三",
-                        type: "文件夹",
-                        date: "2021.5.19",
-                        size: "10MB",
-                        children: [],
-                    }, {
-                        id: 14,
-                        name: "文件3",
-                        type: "文件",
-                        date: "2021.5.19",
-                        size: "10MB",
-                    }, {
-                        id: 15,
-                        name: "文件4",
-                        type: "文件",
-                        date: "2021.5.19",
-                        size: "10MB",
-                    }, ]
-                }, {
-                    id: 2,
-                    name: "文件夹",
-                    children: [{
-                        id: 21,
-                        name: "文件夹1",
-                        children: [{
-                            id: 211,
-                            name: "文件夹1",
-                            children: []
-                        }, {
-                            id: 212,
-                            name: "文件1",
-                        }, {
-                            id: 213,
-                            name: "文件2",
-                        }, {
-                            id: 214,
-                            name: "文件3",
-                        }, {
-                            id: 215,
-                            name: "文件4",
-                        }, ]
-                    }, {
-                        id: 22,
-                        name: "文件1",
-                    }, {
-                        id: 23,
-                        name: "文件2",
-                    }, {
-                        id: 24,
-                        name: "文件3",
-                    }, {
-                        id: 25,
-                        name: "文件4",
-                    }, ]
-                }, {
-                    id: 3,
-                    name: "文件",
-                }],
+                datas: [], // 全部数据
                 selectKey: null,
                 folders: [],
                 zIndex: 1, // 默认文件夹层级
@@ -218,12 +107,7 @@
              */
             initData() {
                 flieList().then(res => {
-                    console.log(res);
                     this.datas = res.data
-                    // let data=JSON.stringify(res.data)
-                    // data=data.replace(/"createTime":/g , '"date":')
-                    // data=data.replace(/"fileSize":/g , '"size":')
-                    // this.datas=JSON.parse(data)
                 })
             },
             /**
@@ -255,15 +139,16 @@
                     // 判断为曾经打开 恢复上次移动和大小改变
                     if (!this.folders[i].del) {
                         let j = this.findFolder()
-                        if (j != -1) {
+                        if (j != -1) { // 确定位置
                             this.folders[i].style.top = this.folders[j].style.top + 50
                             this.folders[i].style.left = this.folders[j].style.left + 50
                         } else {
                             this.folders[i].style.top = 100
                             this.folders[i].style.left = 100
                         }
-                        this.folders[i].style.height = 450
+                        this.folders[i].style.height = 450 // 确定大小
                         this.folders[i].style.width = 800
+                        this.folders[i].datas = item // 更新数据
                         this.folders[i].del = true
                     }
                     this.folders[i].style.zIndex = ++this.zIndex
@@ -317,32 +202,34 @@
              * 管理所有的右键操作
              */
             rightMenu(e, type, val) {
+                console.log(e, type, val);
                 this.rightClickList.forEach(n => n.show = true) // 全部选项恢复默认开启
                 this.rightClickLeft = e.pageX // 调整位置
                 this.rightClickTop = e.pageY
                 this.rightClickFlag = true // 开启窗口
-                if (type != "desktop") { // 增加右击目标类型（过滤冒泡至桌面，桌面的类型在自己方法里面加）
-                    this.rightClickData = {} // 清空右击数据
-                    this.rightClickType = type
-                }
                 if (type == 'desktopFolder' && val) { // 桌面文件夹右键
-                    console.log(e, type, val);
                     this.rightClickData = val
+                    this.rightClickType = type
                     this.rightClickList[1].show = this.rightClickList[2].show = false
+                    return
                 }
                 if (type == 'tablesItem') { // 文件夹内单行右键
                     this.rightClickData = val
+                    this.rightClickType = type
                     this.rightClickList[1].show = this.rightClickList[2].show = false
+                    return
                 }
-                if (type == 'tables') { // 文件夹整体右键
+                if (type == 'tables' && !e.path.find(n => n.nodeName == "TBODY")) { // 文件夹整体右键
                     this.rightClickData = val
+                    this.rightClickType = type
                     this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                    return
                 }
                 if (type == 'desktop' && e.path[0].className == "folder-box") { // 桌面右键
-                    console.log(e);
                     this.rightClickData = { id: -1 }
                     this.rightClickType = type
                     this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                    return
                 }
             },
             /**
@@ -354,10 +241,16 @@
                     this.clearClickFun({})
                     if (val.dictValue == "F5") {
                         console.log("刷新数据");
+                        let ts = this
+                        this.folders.forEach((n, i) => {
+                            let nam = "folder" + i
+                            ts.$refs[nam][0].initData()
+                        });
                         this.initData()
                     }
                     if (val.dictValue == "name") {
                         console.log("重命名");
+                        this.$refs.newfolder.initData("edit", this.rightClickData.id, this.rightClickData.fileSuffix)
                     }
                     if (val.dictValue == "del") {
                         console.log("删除操作");
@@ -371,7 +264,7 @@
                     }
                     if (val.dictValue == "newFolder") {
                         console.log("新建文件夹");
-                        this.$refs.newfolder.initData("add",this.rightClickData.id)
+                        this.$refs.newfolder.initData("add", this.rightClickData.id)
                     }
 
 
@@ -423,9 +316,9 @@
              */
             updata(file, fileList) {
                 let formData = new FormData();
-				let params={
-					parentId:this.rightClickData.id,
-				}
+                let params = {
+                    parentId: this.rightClickData.id,
+                }
                 Object.keys(params).forEach((key) => {
                     if ("undefined" != typeof params[key] && params[key] != null) {
                         formData.append(key, params[key]);
@@ -434,10 +327,9 @@
                 if (fileList[0] != null) {
                     formData.append("multipartFiles", fileList[0].raw);
                 }
-                console.log(11111);
-				newFiles(formData).then(res=>{
-					console.log(res);
-				})
+                newFiles(formData).then(res => {
+                    console.log(res);
+                })
             },
         },
         mounted() {
