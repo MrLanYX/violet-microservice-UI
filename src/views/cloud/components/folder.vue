@@ -1,5 +1,5 @@
 <template>
-    <div :class="open?'input':'out'" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
+    <div v-if="onOff" :class="open?'input':'out'" @mousedown="addZindex" class="folder box" :style="'top:'+styles.top+'px;left:'+styles.left+'px;height:'+styles.height+'px;width:'+styles.width+'px;z-index:'+styles.zIndex">
         <div class="top flex pl5 pt5 pr5 pb5 l-l-l">
             <div class="tool px30 pl5 pr10 flex l-l">
                 <svg class="icon" aria-hidden="true">
@@ -26,13 +26,17 @@
 
         <div class="main flex l-l pl10 pr5 pb5">
             <div class="pt10 pr10">
-                <div v-for="item in typeClass" :key="item.id" class="pl10 pt10 pb10 oto mb10" :class="{select:selectTypeClass==item.id}" @click="selectTypeClass==item.id?selectTypeClass=-1:selectTypeClass=item.id">
-                    {{item.label}}
+                <div v-for="item in filesType" :key="item.dictCode" class="pl10 pt10 pb10 oto mb10" :class="{select:selectTypeClass==item.dictValue}" @click="selectTypeClass==item.dictValue?selectTypeClass=-1:selectTypeClass=item.dictValue">
+                    {{item.dictLabel}}
                 </div>
             </div>
             <div @contextmenu="tableRightClick">
                 <el-table :data="obj.children" @row-dblclick="dbClickRow" @row-contextmenu="itemRightClick" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
                     <el-table-column show-overflow-tooltip prop="fileType" label="文件类型">
+                        <template slot-scope="scope">
+                            <span v-if="scope.row.fileType==0">文件夹</span>
+                            <span v-else>{{scope.row.fileSuffix}}</span>
+                        </template>
                     </el-table-column>
                     <el-table-column show-overflow-tooltip prop="sourceName" label="文件名">
                     </el-table-column>
@@ -64,6 +68,7 @@
             styles: Object,
             open: Boolean,
             delFlag: Boolean,
+            filesType: Array,
         },
         components: {},
         data() {
@@ -74,30 +79,10 @@
                 mouseX: 0, // 鼠标x位置
                 mouseY: 0, // 鼠标y位置
                 tableData: [],
-                typeClass: [{ //文件类型分类
-                    id: 1,
-                    label: "文件夹",
-                    value: "folder",
-                }, {
-                    id: 2,
-                    label: "视频",
-                    value: "movie",
-                }, {
-                    id: 3,
-                    label: "PNG",
-                    value: "png",
-                }, {
-                    id: 4,
-                    label: "JPG",
-                    value: "jpg",
-                }, {
-                    id: 5,
-                    label: "PDF",
-                    value: "pdf",
-                }, ],
-                selectTypeClass: -1, // 选中的分类
+                selectTypeClass: "-1", // 选中的分类
                 oldData: {}, // 旧样式数据 全屏恢复用
                 historyArr: [], // 用于存储对文件夹的操作记录
+                onOff: true, // 文件夹的摧毁开关，在查不到数据的时候触发
             }
         },
         methods: {
@@ -110,15 +95,36 @@
                 for (const key in this.historyArr) {
                     if (Object.hasOwnProperty.call(this.historyArr, key)) {
                         await getFilesByParentId(this.historyArr[key].id).then(res => {
-                            if (res.data.length==0) {
-                                this.historyArr[key]=null
+                            if (res.data.length == 0) {
+                                this.historyArr[key] = null
                             }
-                            this.historyArr[key]=res.data[0];
+                            this.historyArr[key] = res.data[0];
                         })
                     }
                 }
                 // 2.过滤空
+                let num = this.historyArr.findIndex(n => n == null)
+                if (num != -1) {
+                    this.historyArr.splice(num, this.historyArr.length - num)
+                }
                 // 3.当前重新赋值
+                let obj = this.historyArr.find(n => n.id == this.obj.id)
+                // console.log(this.historyArr);
+                // console.log(obj);
+                // console.log(this.obj);
+                if (obj) {
+                    this.$emit("update:obj", obj)
+                } else {
+                    if (this.historyArr.length == 0) {
+                        // 通过if销毁整个文件夹,不走动画
+                        this.onOff = false
+                        this.$emit("update:open", false)
+                        this.$emit("update:delFlag", false)
+                        this.$emit("update:obj", { id: -1 })
+                    } else {
+                        this.$emit("update:obj", this.historyArr[this.historyArr.length - 1])
+                    }
+                }
             },
             /**
              * 鼠标点下标题开启移动状态
@@ -270,6 +276,7 @@
             window.addEventListener("mousemove", this.moveMouse);
             window.addEventListener("mouseup", this.mouseUp);
             this.historyArr.push(this.obj)
+            console.log(this.historyArr);
         },
         watch: {},
         computed: {

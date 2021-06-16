@@ -43,7 +43,7 @@
         </div>
 
 
-        <folder v-for="(item,i) in folders" :ref="'folder'+i" :key="i" :styles="item.style" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
+        <folder v-for="(item,i) in folders" :ref="'folder'+i" :key="i" :styles="item.style" :filesType="filesType" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
 
 
         <transition name="draw">
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-    import { flieList, newFiles } from '@/api/center/cloud'
+    import { flieList, newFiles,download } from '@/api/center/cloud'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -99,6 +99,7 @@
                 rightClickList: [], // 右键菜单列表
                 rightClickData: {}, //右击目标的数据
                 rightClickType: "", // 右击目标的类型
+                filesType:[],// 文件类型
             }
         },
         methods: {
@@ -202,7 +203,7 @@
              * 管理所有的右键操作
              */
             rightMenu(e, type, val) {
-                console.log(e, type, val);
+                // console.log(e, type, val);
                 this.rightClickList.forEach(n => n.show = true) // 全部选项恢复默认开启
                 this.rightClickLeft = e.pageX // 调整位置
                 this.rightClickTop = e.pageY
@@ -210,10 +211,16 @@
                 if (type == 'desktopFolder' && val) { // 桌面文件夹右键
                     this.rightClickData = val
                     this.rightClickType = type
-                    this.rightClickList[1].show = this.rightClickList[2].show = false
+                    this.rightClickList[1].show = this.rightClickList[2].show = this.rightClickList[7].show = false
                     return
                 }
-                if (type == 'tablesItem') { // 文件夹内单行右键
+                if (type == 'tablesItem' && val.fileType == 0) { // 文件夹内单行右键
+                    this.rightClickData = val
+                    this.rightClickType = type
+                    this.rightClickList[1].show = this.rightClickList[2].show = this.rightClickList[7].show = false
+                    return
+                }
+                if (type == 'tablesItem' && val.fileType == 1) { // 文件右键
                     this.rightClickData = val
                     this.rightClickType = type
                     this.rightClickList[1].show = this.rightClickList[2].show = false
@@ -222,13 +229,13 @@
                 if (type == 'tables' && !e.path.find(n => n.nodeName == "TBODY")) { // 文件夹整体右键
                     this.rightClickData = val
                     this.rightClickType = type
-                    this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                    this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = this.rightClickList[7].show = false
                     return
                 }
                 if (type == 'desktop' && e.path[0].className == "folder-box") { // 桌面右键
                     this.rightClickData = { id: -1 }
                     this.rightClickType = type
-                    this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = false
+                    this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = this.rightClickList[7].show = false
                     return
                 }
             },
@@ -274,12 +281,16 @@
                     }
 
 
-                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.type == "文件夹") {
+                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.fileType == "0") {
                         console.log("文件夹内文件夹打开");
                         this.dbClickFolder(this.rightClickData)
                     }
-                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.type == "文件") {
+                    if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.fileType == "1") {
                         console.log("文件夹内文件打开");
+                    }
+                    if (this.rightClickType == "tablesItem" && val.dictValue == "download" && this.rightClickData.fileType == "1") {
+                        console.log("文件下载");
+                        download(this.rightClickData).then(res=>{})
                     }
                 }
             },
@@ -338,6 +349,9 @@
             this.getDicts("cloud_right_click_list").then(response => {
                 this.rightClickList = response.data;
                 this.rightClickList.forEach(n => n.show = true)
+            });
+            this.getDicts("cloud_files_type").then(response => {
+                this.filesType=response.data;
             });
         },
         watch: {},
