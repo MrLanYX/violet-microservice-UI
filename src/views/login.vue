@@ -48,7 +48,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2021 ruoyi.vip All Rights Reserved.</span>
+      <span>Copyright © 2021-2022 weblyx.cn All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -157,7 +157,8 @@ export default {
 
 .login-form {
   border-radius: 6px;
-  background: #ffffff;
+  background: #ffffff80;
+  border: 1px solid #aaa;
   width: 400px;
   padding: 25px 25px 5px 25px;
   .el-input {

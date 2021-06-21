@@ -71,7 +71,7 @@
 </template>
 
 <script>
-    import { flieList, newFiles,download } from '@/api/center/cloud'
+    import { flieList, newFiles, download } from '@/api/center/cloud'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -99,7 +99,7 @@
                 rightClickList: [], // 右键菜单列表
                 rightClickData: {}, //右击目标的数据
                 rightClickType: "", // 右击目标的类型
-                filesType:[],// 文件类型
+                filesType: [], // 文件类型
             }
         },
         methods: {
@@ -107,9 +107,14 @@
              * 初始化加载用户文件数据
              */
             initData() {
+                let ts = this
                 flieList().then(res => {
                     this.datas = res.data
                 })
+                this.folders.forEach((n, i) => {
+                    let nam = "folder" + i
+                    ts.$refs[nam][0].initData()
+                });
             },
             /**
              * 单选中文件夹
@@ -248,11 +253,6 @@
                     this.clearClickFun({})
                     if (val.dictValue == "F5") {
                         console.log("刷新数据");
-                        let ts = this
-                        this.folders.forEach((n, i) => {
-                            let nam = "folder" + i
-                            ts.$refs[nam][0].initData()
-                        });
                         this.initData()
                     }
                     if (val.dictValue == "name") {
@@ -290,7 +290,7 @@
                     }
                     if (this.rightClickType == "tablesItem" && val.dictValue == "download" && this.rightClickData.fileType == "1") {
                         console.log("文件下载");
-                        download(this.rightClickData).then(res=>{})
+                        download(this.rightClickData).then(res => {})
                     }
                 }
             },
@@ -351,7 +351,7 @@
                 this.rightClickList.forEach(n => n.show = true)
             });
             this.getDicts("cloud_files_type").then(response => {
-                this.filesType=response.data;
+                this.filesType = response.data;
             });
         },
         watch: {},
