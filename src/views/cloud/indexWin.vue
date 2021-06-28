@@ -5,8 +5,8 @@
                 <iconfont size="40" icon="#iconguanji" bg="#eee" text="关机" @click="logout"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
-                <iconfont size="40" icon="#iconfenxiang" bg="#eee" text="分享管理"></iconfont>
-                <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站"></iconfont>
+                <iconfont size="40" icon="#iconfenxiang" bg="#eee" text="分享管理" @click="openMessage(0)"></iconfont>
+                <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站" @click="openMessage(1)"></iconfont>
             </div>
             <div class="flex" v-show="folders.findIndex(n=>n.del==true)!=-1">
                 <el-divider direction="vertical"></el-divider>
@@ -26,7 +26,7 @@
                 <iconfont size="40" :icon="routerList?'#iconxiangyouzhankai':'#iconHdonghua-xiangzuozhankai'" bg="#eee" text="服务列表" @click="routerList=!routerList"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <timer></timer>
-                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="messageFalg=!messageFalg"></iconfont>
+                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="openMessage(2)"></iconfont>
             </div>
         </div>
 
@@ -341,6 +341,12 @@
                 newFiles(formData).then(res => {
                     console.log(res);
                 })
+            },
+            /**
+             * 打开右边信息栏
+             */
+            openMessage(val){// 0.分享管理 1.回收站 2.日志消息
+                this.messageFalg=!this.messageFalg
             },
         },
         mounted() {

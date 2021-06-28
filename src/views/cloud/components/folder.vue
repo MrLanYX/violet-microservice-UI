@@ -91,6 +91,10 @@
              */
             async initData() {
                 console.log("文件夹刷新");
+                // 0.文件夹摧毁不必刷新
+                if (this.onOff == false || this.delFlag == false) {
+                    return
+                }
                 // 1.历史刷新
                 for (const key in this.historyArr) {
                     if (Object.hasOwnProperty.call(this.historyArr, key)) {
