@@ -48,10 +48,15 @@
 
         <transition name="draw">
             <div class="message-box ms box" v-if="messageFalg">
+                <el-input v-model="searchMessage" size="mini" placeholder="请输入搜索内容"></el-input>
                 <div class="pl10 pr0 pt10 pb10 pr10">
                     <div v-for="i in 9" class="mb10 message-box-card" :key="i" :style="messageFalg?('animation: cardIpnut .8s ease-out '+(i*0.2)+'s both alternate;'):''">
                         <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{i}}</div>
                         <div class="pt10 pl10 pr10 pb30">我现在我现在我现在我现在我现在我现在我现在我现在</div>
+                        <div class="text-align-r pr10">
+                            <el-button type="text" size="mini" icon="el-icon-document">详细信息</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-delete">取消分享</el-button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -67,15 +72,17 @@
         </el-upload>
 
         <newfolder ref="newfolder" @updata="initData"></newfolder>
+        <creatShare ref="creatShare"></creatShare>
     </div>
 </template>
 
 <script>
-    import { flieList, newFiles, download } from '@/api/center/cloud'
+    import { flieList, newFiles, download, getShareList } from '@/api/center/cloud'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
     import newfolder from './components/newfolder'
+    import creatShare from './components/creatShare'
     export default {
         name: '',
         props: {},
@@ -84,6 +91,7 @@
             timer,
             folder,
             newfolder,
+            creatShare,
         },
         data() {
             return {
@@ -100,6 +108,7 @@
                 rightClickData: {}, //右击目标的数据
                 rightClickType: "", // 右击目标的类型
                 filesType: [], // 文件类型
+                searchMessage: "", // 右侧搜索
             }
         },
         methods: {
@@ -264,6 +273,7 @@
                     }
                     if (val.dictValue == "share") {
                         console.log("分享");
+                        this.$refs.creatShare.initData(this.rightClickData.id)
                     }
                     if (val.dictValue == "upload") {
                         console.log("上传文件");
@@ -345,8 +355,13 @@
             /**
              * 打开右边信息栏
              */
-            openMessage(val){// 0.分享管理 1.回收站 2.日志消息
-                this.messageFalg=!this.messageFalg
+            openMessage(val) { // 0.分享管理 1.回收站 2.日志消息
+                this.messageFalg = true
+                if (val == 0) {
+                    getShareList().then(res => {
+                        console.log(res);
+                    })
+                }
             },
         },
         mounted() {

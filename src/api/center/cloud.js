@@ -54,3 +54,20 @@ export function download(data) {
         }
     })
 }
+
+// 分享列表
+export function getShareList(query) {
+    return request({
+        url: '/system/share/list',
+        method: 'get',
+        // data: query
+    })
+}
+// 分享生成
+export function shareAdd(query) {
+    return request({
+        url: '/system/share',
+        method: 'post',
+        data: query
+    })
+}

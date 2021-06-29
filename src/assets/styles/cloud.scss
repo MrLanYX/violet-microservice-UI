@@ -288,9 +288,18 @@ $boxS:#555; // 盒子阴影
             overflow: hidden;
 
             // 卡片容器
-            >div {
+            >div:first-child{
+                margin-left: 10px;
+                margin-top: 10px;
+                padding-right: 17px;
+                input{
+                    background-color: #00000040;
+                    color: #fff;
+                }
+            }
+            >div:last-child {
                 width: 324px;
-                height: 100%;
+                height: calc(100% - 38px);
                 overflow-x: hidden;
                 overflow-y: scroll;
             }

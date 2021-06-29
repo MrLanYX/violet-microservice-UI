@@ -13,7 +13,7 @@
 <script>
     import { newFiles,edit } from '@/api/center/cloud'
     export default {
-        name: '',
+        name: 'newfolder',
         props: {},
         components: {},
         data() {

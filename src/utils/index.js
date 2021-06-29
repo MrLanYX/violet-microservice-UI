@@ -387,4 +387,14 @@ export function camelCase(str) {
 export function isNumberStr(str) {
   return /^[+-]?(0|([1-9]\d*))(\.\d+)?$/g.test(str)
 }
- 
+
+/**
+ * 复制到粘贴板
+ */
+export function copy(url) {
+  var input = document.getElementById("copyInput");
+  input.value = url; // 修改文本框的内容
+  console.log(input.value);
+  input.select(); // 选中文本
+  document.execCommand("copy"); // 执行浏览器复制命令
+}

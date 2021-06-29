@@ -62,7 +62,7 @@
 <script>
     import { getFilesByParentId } from '@/api/center/cloud'
     export default {
-        name: '',
+        name: 'folder',
         props: {
             obj: Object,
             styles: Object,
