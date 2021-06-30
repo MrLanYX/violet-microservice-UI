@@ -41,14 +41,15 @@ export function download(data) {
         // data: data.id,
         responseType: 'blob'
     }).then(async (response) => { // 处理返回的文件流
-        const blob = new Blob([response], {type: 'application/'+data.fileType})
+        const blob = new Blob([response], { type: 'application/' + data.fileType })
         const filename = data.sourceName
         const link = document.createElement('a')
         link.href = URL.createObjectURL(blob)
         link.download = filename
         document.body.appendChild(link)
         link.click()
-        await function() {
+        await
+        function() {
             URL.revokeObjectURL(blob)
             document.body.removeChild(link)
         }
@@ -63,11 +64,22 @@ export function getShareList(query) {
         // data: query
     })
 }
+
 // 分享生成
 export function shareAdd(query) {
     return request({
         url: '/system/share',
         method: 'post',
         data: query
+    })
+}
+
+// 分享提取
+export function getShare(query) {
+    console.log(query);
+    return request({
+        url: '/system/share/detail',
+        method: 'get',
+        params: query
     })
 }

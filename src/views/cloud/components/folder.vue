@@ -40,7 +40,7 @@
                     </el-table-column>
                     <el-table-column show-overflow-tooltip prop="sourceName" label="文件名">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="updateTime" label="上传日期">
+                    <el-table-column show-overflow-tooltip prop="createTime" label="创建日期">
                     </el-table-column>
                     <el-table-column show-overflow-tooltip prop="fileSize" label="大小">
                     </el-table-column>

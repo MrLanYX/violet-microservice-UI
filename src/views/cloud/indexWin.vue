@@ -73,16 +73,19 @@
 
         <newfolder ref="newfolder" @updata="initData"></newfolder>
         <creatShare ref="creatShare"></creatShare>
+        <copyShare ref="copyShare" @updata="initData"></copyShare>
     </div>
 </template>
 
 <script>
     import { flieList, newFiles, download, getShareList } from '@/api/center/cloud'
+    import { getQueryVariable } from '@/utils/index'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
     import newfolder from './components/newfolder'
     import creatShare from './components/creatShare'
+    import copyShare from './components/copyShare'
     export default {
         name: '',
         props: {},
@@ -92,6 +95,7 @@
             folder,
             newfolder,
             creatShare,
+            copyShare,
         },
         data() {
             return {
@@ -365,7 +369,6 @@
             },
         },
         mounted() {
-            // console.log(this.routes);
             this.initData()
             this.getDicts("cloud_right_click_list").then(response => {
                 this.rightClickList = response.data;
@@ -374,6 +377,11 @@
             this.getDicts("cloud_files_type").then(response => {
                 this.filesType = response.data;
             });
+            // 处理分享操作
+            let key = getQueryVariable("id")
+            if (key) {
+                this.$refs.copyShare.initData(key)
+            }
         },
         watch: {},
         computed: {

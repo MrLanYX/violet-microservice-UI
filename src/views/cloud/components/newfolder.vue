@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-dialog :title="title" :visible.sync="dialogVisible" width="30%" @close="handleClose">
+        <el-dialog :close-on-click-modal="false" :title="title" :visible.sync="dialogVisible" width="30%" @close="handleClose">
             <el-input v-model="input" :placeholder="placeholder"></el-input>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
@@ -62,6 +62,7 @@
                     });
                     newFiles(formData).then(res => {
                         this.$message.success("新建文件夹成功")
+                        this.$emit("updata")
                     })
                 } else {
                     let params = {

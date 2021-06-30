@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="创建分享" :visible.sync="dialogVisible" width="30%" @close="handleClose">
+    <el-dialog :close-on-click-modal="false" title="创建分享" :visible.sync="dialogVisible" width="30%" @close="handleClose">
         <div style="display:flex">
             <div>选择分享时效：</div>
             <div class="pt3 pl10">
