@@ -403,10 +403,23 @@ export function copy(url) {
  */
 export function getQueryVariable(variable) {
     var query = window.location.search.substring(1);
-	var vars = query.split("&");
+    var vars = query.split("&");
     for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split("=");
         if (pair[0] == variable) { return pair[1]; }
     }
     return (false);
+}
+/**
+ * 树状数据递归查找
+ */
+export const treeFind = (tree, func) => {
+    for (const data of tree) {
+        if (func(data)) return data
+        if (data.children) {
+            const res = treeFind(data.children, func)
+            if (res) return res
+        }
+    }
+    return null
 }

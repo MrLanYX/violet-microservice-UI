@@ -49,6 +49,7 @@ export function download(data) {
         document.body.appendChild(link)
         link.click()
         await
+
         function() {
             URL.revokeObjectURL(blob)
             document.body.removeChild(link)
@@ -76,10 +77,18 @@ export function shareAdd(query) {
 
 // 分享提取
 export function getShare(query) {
-    console.log(query);
     return request({
         url: '/system/share/detail',
         method: 'get',
         params: query
+    })
+}
+
+// 删除分享
+export function delShare(id) {
+    return request({
+        url: '/system/share/' + id,
+        method: 'delete',
+        // params: query
     })
 }

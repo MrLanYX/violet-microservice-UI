@@ -286,17 +286,20 @@ $boxS:#555; // 盒子阴影
             bottom: 85px;
             width: 320px;
             overflow: hidden;
+            font-size: 14px;
 
             // 卡片容器
-            >div:first-child{
+            >div:first-child {
                 margin-left: 10px;
                 margin-top: 10px;
                 padding-right: 17px;
-                input{
+
+                input {
                     background-color: #00000040;
                     color: #fff;
                 }
             }
+
             >div:last-child {
                 width: 324px;
                 height: calc(100% - 38px);
@@ -350,6 +353,30 @@ $boxS:#555; // 盒子阴影
                 color: #999;
                 cursor: not-allowed;
                 background: $boxBg !important;
+            }
+        }
+
+        // 收藏他人分享
+        .copyShare-main {
+            display: flex;
+            height: 50vh;
+            justify-content: center;
+            align-items: center;
+
+            .left,
+            .right {
+                height: 100%;
+                flex: 1;
+            }
+
+            .left {
+                border-right: 1px solid #DCDFE6;
+                display: flex;
+                flex-direction: column;
+
+                >div:last-child {
+                    flex: 1;
+                }
             }
         }
 

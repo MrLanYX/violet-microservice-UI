@@ -24,7 +24,7 @@
         </div>
 
 
-        <div class="main flex l-l pl10 pr5 pb5">
+        <div class="main flex l-l pl5 pr5 pb5">
             <div class="pt10 pr10">
                 <div v-for="item in filesType" :key="item.dictCode" class="pl10 pt10 pb10 oto mb10" :class="{select:selectTypeClass==item.dictValue}" @click="selectTypeClass==item.dictValue?selectTypeClass=-1:selectTypeClass=item.dictValue">
                     {{item.dictLabel}}

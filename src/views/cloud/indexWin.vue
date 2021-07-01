@@ -4,7 +4,6 @@
             <div class="pl5 flex -l-">
                 <iconfont size="40" icon="#iconguanji" bg="#eee" text="关机" @click="logout"></iconfont>
                 <el-divider direction="vertical"></el-divider>
-                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
                 <iconfont size="40" icon="#iconfenxiang" bg="#eee" text="分享管理" @click="openMessage(0)"></iconfont>
                 <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站" @click="openMessage(1)"></iconfont>
             </div>
@@ -26,7 +25,8 @@
                 <iconfont size="40" :icon="routerList?'#iconxiangyouzhankai':'#iconHdonghua-xiangzuozhankai'" bg="#eee" text="服务列表" @click="routerList=!routerList"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <timer></timer>
-                <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="openMessage(2)"></iconfont>
+                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
+                <!-- <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="openMessage(2)"></iconfont> -->
             </div>
         </div>
 
@@ -49,13 +49,31 @@
         <transition name="draw">
             <div class="message-box ms box" v-if="messageFalg">
                 <el-input v-model="searchMessage" size="mini" placeholder="请输入搜索内容"></el-input>
-                <div class="pl10 pr0 pt10 pb10 pr10">
-                    <div v-for="i in 9" class="mb10 message-box-card" :key="i" :style="messageFalg?('animation: cardIpnut .8s ease-out '+(i*0.2)+'s both alternate;'):''">
-                        <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{i}}</div>
-                        <div class="pt10 pl10 pr10 pb30">我现在我现在我现在我现在我现在我现在我现在我现在</div>
+                <div class="pl10 pr0 pt10 pb10 pr10" v-if="rightDataType">
+                    <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
+                        <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
+                        <div class="pt10 pl10 pr10 pb20">
+                            <p><i class="el-icon-paperclip"></i> 分享创建时间：</p>
+                            <p><i class="el-icon-timer"></i> 分享有效时长：</p>
+                            <p><i class="el-icon-link"></i> 分享链接：</p>
+                            <p><i class="el-icon-key"></i> 分享提取密码：</p>
+                        </div>
                         <div class="text-align-r pr10">
-                            <el-button type="text" size="mini" icon="el-icon-document">详细信息</el-button>
-                            <el-button type="text" size="mini" icon="el-icon-delete">取消分享</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-document">一键复制</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-delete" @click="cancelShare(item)">取消分享</el-button>
+                        </div>
+                    </div>
+                </div>
+                <div class="pl10 pr0 pt10 pb10 pr10" v-else>
+                    <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
+                        <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
+                        <div class="pt10 pl10 pr10 pb30">
+                            <p><i class="el-icon-printer"></i> 删除时间：</p>
+                            <p><i class="el-icon-timer"></i> 剩余恢复时长：</p>
+                        </div>
+                        <div class="text-align-r pr10">
+                            <el-button type="text" size="mini" icon="el-icon-finished">恢复删除</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-delete">彻底删除</el-button>
                         </div>
                     </div>
                 </div>
@@ -78,8 +96,8 @@
 </template>
 
 <script>
-    import { flieList, newFiles, download, getShareList } from '@/api/center/cloud'
-    import { getQueryVariable } from '@/utils/index'
+    import { flieList, newFiles, download, getShareList, delShare } from '@/api/center/cloud'
+    import { getQueryVariable, treeFind } from '@/utils/index'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -113,6 +131,8 @@
                 rightClickType: "", // 右击目标的类型
                 filesType: [], // 文件类型
                 searchMessage: "", // 右侧搜索
+                rightData: [], //右侧信息栏通用数据
+                rightDataType: true, // 右侧信息栏数据显示类型，真为分享记录，假为回收站
             }
         },
         methods: {
@@ -229,7 +249,12 @@
                 if (type == 'desktopFolder' && val) { // 桌面文件夹右键
                     this.rightClickData = val
                     this.rightClickType = type
-                    this.rightClickList[1].show = this.rightClickList[2].show = this.rightClickList[7].show = false
+                    this.rightClickList[1].show = this.rightClickList[2].show = false
+                    if (val.fileType == "1") { // 桌面文件是否开启下载
+                        this.rightClickList[7].show = true
+                    } else {
+                        this.rightClickList[7].show = false
+                    }
                     return
                 }
                 if (type == 'tablesItem' && val.fileType == 0) { // 文件夹内单行右键
@@ -253,7 +278,7 @@
                 if (type == 'desktop' && e.path[0].className == "folder-box") { // 桌面右键
                     this.rightClickData = { id: -1 }
                     this.rightClickType = type
-                    this.rightClickList[0].show = this.rightClickList[2].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = this.rightClickList[7].show = false
+                    this.rightClickList[0].show = this.rightClickList[3].show = this.rightClickList[4].show = this.rightClickList[5].show = this.rightClickList[7].show = false
                     return
                 }
             },
@@ -362,10 +387,44 @@
             openMessage(val) { // 0.分享管理 1.回收站 2.日志消息
                 this.messageFalg = true
                 if (val == 0) {
+                    this.rightDataType = true
                     getShareList().then(res => {
                         console.log(res);
+                        this.rightData = res.rows
+                        // for (const item of this.rightData) {
+                        //     let from = {
+                        //         shareId: item.shareId,
+                        //         checkCode: item.checkCode,
+                        //     }
+                        //     await getShare(from).then(res => {
+                        //         item.fileName=res.data.clouddiscFileList[0].sourceName
+                        //     })
+                        // }
                     })
+                } else {
+                    this.rightDataType = false
+                    this.rightData = []
                 }
+            },
+            /**
+             * 取消分享
+             */
+            cancelShare(item) {
+                this.$confirm('此操作将永久取消分享, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    delShare(item.shareId).then(res => {
+                        this.openMessage(0)
+                        this.$message.success('分享删除成功!');
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '删除分享已取消'
+                    });
+                });
             },
         },
         mounted() {

@@ -5,10 +5,10 @@
                 <el-button slot="append" icon="el-icon-attract" @click="submit">提取</el-button>
             </el-input>
             <div v-if="flag" class="left">
-                <p>分享者：{{youDatas.clouddiscFileShare.createBy}}</p>
-                <p>分享时间：{{youDatas.clouddiscFileShare.shareStartTime}}</p>
-                <p>分享时长：{{date}}</p>
-                <p>分享内容：</p>
+                <p class="mb10">分享者：{{youDatas.clouddiscFileShare.createBy}}</p>
+                <p class="mb10">分享时间：{{youDatas.clouddiscFileShare.shareStartTime}}</p>
+                <p class="mb10">分享时长：{{date}}</p>
+                <p class="mb10">分享内容：</p>
                 <div class="gdbox">
                     <el-tree :data="youDatas.clouddiscFileList" :props="{children: 'children',label: 'sourceName'}" default-expand-all ref="tree0"></el-tree>
                 </div>
@@ -80,7 +80,11 @@
                             newTree.forEach(x => x.children && (x.children = filterTree(x.children)))
                             return newTree
                         }
-                        this.meDatas = filterTree(this.meDatas)
+                        this.meDatas = [{
+                            id: -1,
+                            sourceName: "根节点",
+                            children: filterTree(this.meDatas)
+                        }]
                     })
                 }).catch(res => {
                     console.log(res);
@@ -151,31 +155,6 @@
     }
 </script>
 
-<style lang="scss" scope>
-    .copyShare-main {
-        display: flex;
-        height: 50vh;
-        justify-content: center;
-        align-items: center;
-    }
+<style lang="scss">
 
-    .left,
-    .right {
-        height: 100%;
-        flex: 1;
-    }
-
-    .left {
-        border-right: 1px solid #DCDFE6;
-        display: flex;
-        flex-direction: column;
-
-        p {
-            margin-top: unset
-        }
-
-        >div:last-child {
-            flex: 1;
-        }
-    }
 </style>
