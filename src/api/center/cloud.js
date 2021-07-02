@@ -39,7 +39,7 @@ export function download(data) {
         url: '/system/file/filedownload/' + data.id,
         method: 'post',
         // data: data.id,
-        responseType: 'blob'
+        responseType: 'blob',
     }).then(async (response) => { // 处理返回的文件流
         const blob = new Blob([response], { type: 'application/' + data.fileType })
         const filename = data.sourceName
@@ -48,9 +48,7 @@ export function download(data) {
         link.download = filename
         document.body.appendChild(link)
         link.click()
-        await
-
-        function() {
+        await function() {
             URL.revokeObjectURL(blob)
             document.body.removeChild(link)
         }
@@ -90,5 +88,41 @@ export function delShare(id) {
         url: '/system/share/' + id,
         method: 'delete',
         // params: query
+    })
+}
+
+// 删除文件或者文件夹
+export function delFile(query) {
+    return request({
+        url: '/system/file/deleteFile',
+        method: 'post',
+        params: query
+    })
+}
+
+// 删除文件或者文件夹
+export function getDelFileLists(query) {
+    return request({
+        url: '/system/bin/list',
+        method: 'get',
+        // params: query
+    })
+}
+
+// 对单文件恢复删除的文件
+export function Undelete(query) {
+    return request({
+        url: '/system/bin/recoverCloudRecycleBin',
+        method: 'post',
+        params: query
+    })
+}
+
+// 删除一条删除记录
+export function delRecord(query) {
+    return request({
+        url: '/system/bin/deleteCloudRecycleBins',
+        method: 'post',
+        data: query
     })
 }

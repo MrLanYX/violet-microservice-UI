@@ -53,13 +53,13 @@
                     <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
                         <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
                         <div class="pt10 pl10 pr10 pb20">
-                            <p><i class="el-icon-paperclip"></i> 分享创建时间：</p>
-                            <p><i class="el-icon-timer"></i> 分享有效时长：</p>
-                            <p><i class="el-icon-link"></i> 分享链接：</p>
-                            <p><i class="el-icon-key"></i> 分享提取密码：</p>
+                            <p><i class="el-icon-paperclip"></i> 分享创建时间：{{item.createTime}}</p>
+                            <p><i class="el-icon-timer"></i> 分享剩余时长：{{item.shareType}}</p>
+                            <p v-if="item.shareType!='已过期'" style="word-break: break-all"><i class="el-icon-link"></i>分享链接：<span style="user-select: all;cursor: pointer">{{item.shareUrl}}</span></p>
+                            <p v-if="item.shareType!='已过期'"><i class="el-icon-key"></i> 分享提取密码：{{item.checkCode}}</p>
                         </div>
                         <div class="text-align-r pr10">
-                            <el-button type="text" size="mini" icon="el-icon-document">一键复制</el-button>
+                            <el-button v-if="item.shareType!='已过期'" type="text" size="mini" icon="el-icon-document" @click="copy(item)">一键复制</el-button>
                             <el-button type="text" size="mini" icon="el-icon-delete" @click="cancelShare(item)">取消分享</el-button>
                         </div>
                     </div>
@@ -67,13 +67,13 @@
                 <div class="pl10 pr0 pt10 pb10 pr10" v-else>
                     <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
                         <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
-                        <div class="pt10 pl10 pr10 pb30">
-                            <p><i class="el-icon-printer"></i> 删除时间：</p>
+                        <div class="pt10 pl10 pr10 pb20">
+                            <p><i class="el-icon-printer"></i> 删除时间：{{item.createTime}}</p>
                             <p><i class="el-icon-timer"></i> 剩余恢复时长：</p>
                         </div>
                         <div class="text-align-r pr10">
-                            <el-button type="text" size="mini" icon="el-icon-finished">恢复删除</el-button>
-                            <el-button type="text" size="mini" icon="el-icon-delete">彻底删除</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-finished" @click="delOperate('restore',item)">恢复删除</el-button>
+                            <el-button type="text" size="mini" icon="el-icon-delete" @click="delOperate('recover',item)">删除记录</el-button>
                         </div>
                     </div>
                 </div>
@@ -96,8 +96,8 @@
 </template>
 
 <script>
-    import { flieList, newFiles, download, getShareList, delShare } from '@/api/center/cloud'
-    import { getQueryVariable, treeFind } from '@/utils/index'
+    import { flieList, newFiles, download, getShareList, delShare, delFile, getDelFileLists, Undelete, delRecord } from '@/api/center/cloud'
+    import { getQueryVariable, treeFind, copy } from '@/utils/index'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -299,6 +299,21 @@
                     }
                     if (val.dictValue == "del") {
                         console.log("删除操作");
+                        this.$confirm('此操作将删除此文件（可在回收站恢复）, 是否继续?', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            delFile({ id: this.rightClickData.id }).then(res => {
+                                this.$message.success('删除成功!');
+                                this.initData()
+                            })
+                        }).catch(() => {
+                            this.$message({
+                                type: 'info',
+                                message: '删除已取消'
+                            });
+                        });
                     }
                     if (val.dictValue == "share") {
                         console.log("分享");
@@ -384,26 +399,37 @@
             /**
              * 打开右边信息栏
              */
-            openMessage(val) { // 0.分享管理 1.回收站 2.日志消息
+            openMessage(val) { // 0.分享管理 1.回收站
+                this.rightData = []
                 this.messageFalg = true
                 if (val == 0) {
                     this.rightDataType = true
                     getShareList().then(res => {
                         console.log(res);
+                        for (const item of res.rows) {
+                            if (item.shareType == "1") {
+                                item.shareType = "永久"
+                            } else {
+                                let start = Date.parse(new Date(item.createTime))
+                                let end = start + item.effectiveTime * (1000 * 3600 * 24)
+                                let difference = (end - Date.parse(new Date()))
+                                if (difference < 0) {
+                                    item.shareType = "已过期"
+                                } else {
+                                    console.log(difference);
+                                    item.shareType = "1"
+                                }
+                            }
+                            item.shareUrl = location.href.split("?")[0] + "?id=" + item.shareId
+                        }
                         this.rightData = res.rows
-                        // for (const item of this.rightData) {
-                        //     let from = {
-                        //         shareId: item.shareId,
-                        //         checkCode: item.checkCode,
-                        //     }
-                        //     await getShare(from).then(res => {
-                        //         item.fileName=res.data.clouddiscFileList[0].sourceName
-                        //     })
-                        // }
                     })
                 } else {
                     this.rightDataType = false
-                    this.rightData = []
+                    getDelFileLists().then(res => {
+                        console.log(res);
+                        this.rightData = res.rows
+                    })
                 }
             },
             /**
@@ -425,6 +451,24 @@
                         message: '删除分享已取消'
                     });
                 });
+            },
+            /**
+             * 复制链接
+             */
+            copy(val) {
+                let url = "后花园的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] + "?id=" + val.shareId + ",提取钥匙：" + val.checkCode
+                copy(url)
+                this.$message.success('链接已复制至粘贴板!');
+            },
+            /**
+             * 对于删除文件后的操作
+             */
+            delOperate(type, val) {
+                if (type == "restore") { // 恢复文件
+                    Undelete({ id: val.id }).then(res => {})
+                } else { // 删除记录
+                    delRecord([val.id]).then(res => {})
+                }
             },
         },
         mounted() {

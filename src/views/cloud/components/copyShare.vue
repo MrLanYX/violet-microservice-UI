@@ -88,7 +88,7 @@
                     })
                 }).catch(res => {
                     console.log(res);
-                    if (res == "Error: 分享已被取消") {
+                    if (res != "Error: 验证码错误！") {
                         this.dialogVisible = false
                         this.$router.replace({ name: "Cloud" })
                         return
