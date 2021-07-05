@@ -73,6 +73,15 @@ export function shareAdd(query) {
     })
 }
 
+// 分享保存到自己身上
+export function shareCopy(query) {
+    return request({
+        url: '/system/file/fileCollect',
+        method: 'post',
+        data: query
+    })
+}
+
 // 分享提取
 export function getShare(query) {
     return request({

@@ -48,7 +48,7 @@
                 shareAdd(param).then(res => {
                     console.log(res);
                     this.dialogVisible = false
-                    let url = "后花园的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] +"?id="+ res.data.shareId + ",提取钥匙：" + res.data.checkCode
+                    let url = "摸鱼站的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] +"?id="+ res.data.shareId + ",提取钥匙：" + res.data.checkCode
                     copy(url)
                     this.$message.success('分享成功！链接已复制至粘贴板');
                 }).catch(res => {

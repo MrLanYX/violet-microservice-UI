@@ -50,7 +50,7 @@
             <div class="message-box ms box" v-if="messageFalg">
                 <el-input v-model="searchMessage" size="mini" placeholder="请输入搜索内容"></el-input>
                 <div class="pl10 pr0 pt10 pb10 pr10" v-if="rightDataType">
-                    <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
+                    <div v-for="(item,index) in rightDataFilter" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
                         <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
                         <div class="pt10 pl10 pr10 pb20">
                             <p><i class="el-icon-paperclip"></i> 分享创建时间：{{item.createTime}}</p>
@@ -65,14 +65,14 @@
                     </div>
                 </div>
                 <div class="pl10 pr0 pt10 pb10 pr10" v-else>
-                    <div v-for="(item,index) in rightData" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
+                    <div v-for="(item,index) in rightDataFilter" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
                         <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
                         <div class="pt10 pl10 pr10 pb20">
                             <p><i class="el-icon-printer"></i> 删除时间：{{item.createTime}}</p>
-                            <p><i class="el-icon-timer"></i> 剩余恢复时长：</p>
+                            <p><i class="el-icon-timer"></i> 剩余恢复时长：{{item.date}}</p>
                         </div>
                         <div class="text-align-r pr10">
-                            <el-button type="text" size="mini" icon="el-icon-finished" @click="delOperate('restore',item)">恢复删除</el-button>
+                            <el-button v-if="item.date!='已过期'" type="text" size="mini" icon="el-icon-finished" @click="delOperate('restore',item)">恢复删除</el-button>
                             <el-button type="text" size="mini" icon="el-icon-delete" @click="delOperate('recover',item)">删除记录</el-button>
                         </div>
                     </div>
@@ -97,7 +97,7 @@
 
 <script>
     import { flieList, newFiles, download, getShareList, delShare, delFile, getDelFileLists, Undelete, delRecord } from '@/api/center/cloud'
-    import { getQueryVariable, treeFind, copy } from '@/utils/index'
+    import { getQueryVariable, treeFind, copy, timeToDate } from '@/utils/index'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -251,8 +251,10 @@
                     this.rightClickType = type
                     this.rightClickList[1].show = this.rightClickList[2].show = false
                     if (val.fileType == "1") { // 桌面文件是否开启下载
+                        this.rightClickList[0].show = false
                         this.rightClickList[7].show = true
                     } else {
+                        this.rightClickList[0].show = true
                         this.rightClickList[7].show = false
                     }
                     return
@@ -402,10 +404,10 @@
             openMessage(val) { // 0.分享管理 1.回收站
                 this.rightData = []
                 this.messageFalg = true
+                this.searchMessage = ""
                 if (val == 0) {
                     this.rightDataType = true
                     getShareList().then(res => {
-                        console.log(res);
                         for (const item of res.rows) {
                             if (item.shareType == "1") {
                                 item.shareType = "永久"
@@ -416,8 +418,7 @@
                                 if (difference < 0) {
                                     item.shareType = "已过期"
                                 } else {
-                                    console.log(difference);
-                                    item.shareType = "1"
+                                    item.shareType = timeToDate(difference)
                                 }
                             }
                             item.shareUrl = location.href.split("?")[0] + "?id=" + item.shareId
@@ -427,7 +428,16 @@
                 } else {
                     this.rightDataType = false
                     getDelFileLists().then(res => {
-                        console.log(res);
+                        for (const item of res.rows) {
+                            let start = Date.parse(new Date(item.createTime))
+                            let end = start + (15 * 1000 * 3600 * 24)
+                            let difference = (end - Date.parse(new Date()))
+                            if (difference < 0) {
+                                item.date = "已过期"
+                            } else {
+                                item.date = timeToDate(difference)
+                            }
+                        }
                         this.rightData = res.rows
                     })
                 }
@@ -456,7 +466,7 @@
              * 复制链接
              */
             copy(val) {
-                let url = "后花园的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] + "?id=" + val.shareId + ",提取钥匙：" + val.checkCode
+                let url = "摸鱼站的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] + "?id=" + val.shareId + ",提取钥匙：" + val.checkCode
                 copy(url)
                 this.$message.success('链接已复制至粘贴板!');
             },
@@ -465,9 +475,15 @@
              */
             delOperate(type, val) {
                 if (type == "restore") { // 恢复文件
-                    Undelete({ id: val.id }).then(res => {})
+                    Undelete({ id: val.id }).then(res => {
+                        this.openMessage(1)
+                        this.$message.success('文件恢复成功!');
+                    })
                 } else { // 删除记录
-                    delRecord([val.id]).then(res => {})
+                    delRecord([val.id]).then(res => {
+                        this.openMessage(1)
+                        this.$message.success('记录删除成功!');
+                    })
                 }
             },
         },
@@ -494,11 +510,12 @@
                 let router2 = all.find(n => n.redirect == "index")
                 let routers = router1.children.concat(router2.children)
                 return routers
-            }
+            },
+            rightDataFilter() {
+                return this.rightData.filter(data => !this.searchMessage || data.fileName.toLowerCase().includes(this.searchMessage.toLowerCase()))
+            },
         },
-        filters: {
-
-        }
+        filters: {}
     }
 </script>
 

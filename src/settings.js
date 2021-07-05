@@ -1,5 +1,5 @@
 module.exports = {
-  title: '后花园服务中心',
+  title: '摸鱼站服务中心',
 
   /**
    * 侧边栏主题 深色主题theme-dark，浅色主题theme-light

@@ -423,3 +423,34 @@ export const treeFind = (tree, func) => {
     }
     return null
 }
+/**
+ * 树状数据递归查找
+ */
+export const timeToDate = (times) => {
+    let d = 0,
+        h = 0,
+        i = 0,
+        s = Math.ceil(times / 1000)
+    if (s >= (24 * 60 * 60)) {
+        d = Math.floor(s / (24 * 60 * 60))
+        s = s % (24 * 60 * 60)
+        h = Math.floor(s / (60 * 60))
+        s = s % (60 * 60)
+        i = Math.floor(s / (60))
+        s = s % (60)
+        return d + "天" + h + "小时" + i + "分" + s + "秒"
+    }
+    if (s >= (60 * 60)) {
+        h = Math.floor(s / (60 * 60))
+        s = s % (60 * 60)
+        i = Math.floor(s / (60))
+        s = s % (60)
+        return h + "小时" + i + "分" + s + "秒"
+    }
+    if (s >= (60)) {
+        i = Math.floor(s / (60))
+        s = s % (60)
+        return i + "分" + s + "秒"
+    }
+    return s + "秒"
+}

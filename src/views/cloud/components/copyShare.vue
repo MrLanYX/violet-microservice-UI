@@ -31,7 +31,7 @@
 </template>
 
 <script>
-    import { flieList, getShare } from '@/api/center/cloud'
+    import { flieList, getShare, shareCopy } from '@/api/center/cloud'
     export default {
         name: 'copyShare',
         props: {},
@@ -106,16 +106,22 @@
                     this.$message.warning("请选择保存位置")
                     return
                 }
-                // let param = {}
-                // shareAdd(param).then(res => {
-                //     console.log(res);
-                //     this.dialogVisible = false
-                //     this.$router.replace({ name: "Cloud" })
-                //     this.$emit("updata")
-                // }).catch(res => {
-                this.dialogVisible = false
-                this.$router.replace({ name: "Cloud" })
-                // })
+                let param = {
+                    shareId: this.key,
+                    checkCode: this.mima,
+                    id:this.youDatas.clouddiscFileList[0].id,
+                    parentId:this.targetId
+                }
+                shareCopy(param).then(res => {
+                    console.log(res);
+                    this.dialogVisible = false
+                    this.$router.replace({ name: "Cloud" })
+                    this.$message.success("保存成功！")
+                    this.$emit("updata")
+                }).catch(res => {
+                    this.dialogVisible = false
+                    this.$router.replace({ name: "Cloud" })
+                })
             },
             /**
              * 新建文件夹弹窗关闭之后

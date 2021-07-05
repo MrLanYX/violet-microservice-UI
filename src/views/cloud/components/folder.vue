@@ -97,12 +97,13 @@
                 }
                 // 1.历史刷新
                 for (const key in this.historyArr) {
-                    if (Object.hasOwnProperty.call(this.historyArr, key)) {
+                    if (Object.hasOwnProperty.call(this.historyArr, key)&&this.historyArr[key].id) {
                         await getFilesByParentId(this.historyArr[key].id).then(res => {
-                            if (res.data.length == 0) {
+                            if (!res.data || res.data.length == 0) {
                                 this.historyArr[key] = null
+                            }else{
+                                this.historyArr[key] = res.data[0];
                             }
-                            this.historyArr[key] = res.data[0];
                         })
                     }
                 }

@@ -35,7 +35,7 @@ export default {
   },
   data() {
     return {
-      title: '后花园服务中心',
+      title: '摸鱼站服务中心',
       logo: logoImg
     }
   }
