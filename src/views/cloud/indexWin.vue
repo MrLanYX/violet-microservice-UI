@@ -85,7 +85,7 @@
             <div v-for="(item,i) in rightClickList" :key="i" class="text-align-l pt5 pl10 pr20 pb5 oto" :class="{'disable':!item.show}" @click="rightMenuClick($event,item)">{{item.dictLabel}}</div>
         </div>
 
-        <el-upload style="display:none" action="Fake Action" multiple :limit="1" :auto-upload="false" :on-change="updata">
+        <el-upload ref="upload" style="display:none" action="Fake Action" :accept="fileType" :limit="1" :auto-upload="false" :on-change="upload">
             <el-button ref="uploadBtn" size="small" type="primary"></el-button>
         </el-upload>
 
@@ -98,6 +98,7 @@
 <script>
     import { flieList, newFiles, download, getShareList, delShare, delFile, getDelFileLists, Undelete, delRecord } from '@/api/center/cloud'
     import { getQueryVariable, treeFind, copy, timeToDate } from '@/utils/index'
+    import { ACCEPT_CONFIG } from './config/config'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import folder from './components/folder'
@@ -133,6 +134,7 @@
                 searchMessage: "", // 右侧搜索
                 rightData: [], //右侧信息栏通用数据
                 rightDataType: true, // 右侧信息栏数据显示类型，真为分享记录，假为回收站
+                fileType: ACCEPT_CONFIG.getAll(), // 文件类型
             }
         },
         methods: {
@@ -381,7 +383,13 @@
             /**
              * 开始上传方法
              */
-            updata(file, fileList) {
+            async upload(file, fileList) {
+                const loading = this.$loading({
+                    lock: true,
+                    text: '文件上传中...',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
                 let formData = new FormData();
                 let params = {
                     parentId: this.rightClickData.id,
@@ -394,9 +402,13 @@
                 if (fileList[0] != null) {
                     formData.append("multipartFiles", fileList[0].raw);
                 }
-                newFiles(formData).then(res => {
-                    console.log(res);
+                await newFiles(formData).then(res => {
+                    // console.log(res);
+                    this.$message.success('上传成功！')
+                    this.initData()
+                    loading.close();
                 })
+                this.$refs.upload.clearFiles()
             },
             /**
              * 打开右边信息栏

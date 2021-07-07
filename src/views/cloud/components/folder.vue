@@ -31,18 +31,18 @@
                 </div>
             </div>
             <div @contextmenu="tableRightClick">
-                <el-table :data="obj.children" @row-dblclick="dbClickRow" @row-contextmenu="itemRightClick" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
-                    <el-table-column show-overflow-tooltip prop="fileType" label="文件类型">
+                <el-table :data="objChildren" :default-sort="{prop:'fileType',order:'ascending'}" @row-dblclick="dbClickRow" @row-contextmenu="itemRightClick" stripe border highlight-current-row style="width: 100%" max-height="100%" height="100%">
+                    <el-table-column show-overflow-tooltip prop="fileType" sortable label="文件类型">
                         <template slot-scope="scope">
                             <span v-if="scope.row.fileType==0">文件夹</span>
-                            <span v-else>{{scope.row.fileSuffix}}</span>
+                            <span v-else>{{scope.row.fileSuffix.toUpperCase()}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="sourceName" label="文件名">
+                    <el-table-column show-overflow-tooltip prop="sourceName" sortable label="文件名">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="createTime" label="创建日期">
+                    <el-table-column show-overflow-tooltip prop="createTime" sortable label="创建日期">
                     </el-table-column>
-                    <el-table-column show-overflow-tooltip prop="fileSize" label="大小">
+                    <el-table-column show-overflow-tooltip prop="fileSize" sortable label="大小">
                     </el-table-column>
                 </el-table>
             </div>
@@ -97,11 +97,11 @@
                 }
                 // 1.历史刷新
                 for (const key in this.historyArr) {
-                    if (Object.hasOwnProperty.call(this.historyArr, key)&&this.historyArr[key].id) {
+                    if (Object.hasOwnProperty.call(this.historyArr, key) && this.historyArr[key].id) {
                         await getFilesByParentId(this.historyArr[key].id).then(res => {
                             if (!res.data || res.data.length == 0) {
                                 this.historyArr[key] = null
-                            }else{
+                            } else {
                                 this.historyArr[key] = res.data[0];
                             }
                         })
@@ -223,6 +223,9 @@
              * 便于前进后退操作
              */
             dbClickRow(row, column) {
+                if (row.fileType == '1') {
+                    return
+                }
                 let i = this.historyArr.length - 1
                 if (i != -1 && this.obj.id == this.historyArr[i].id) {
                     console.log("直接加上去");
@@ -302,6 +305,17 @@
                 console.log(back, going);
                 return [back, going]
             },
+            objChildren() {
+                console.log(this.selectTypeClass);
+                if (this.selectTypeClass == -1) {
+                    return this.obj.children
+                }
+                if (this.selectTypeClass == 0) {
+                    return this.obj.children.filter(data => data.fileType == this.selectTypeClass)
+                } else {
+                    return this.obj.children.filter(data => data.fileSuffix == this.selectTypeClass)
+                }
+            }
         },
         filters: {},
     }

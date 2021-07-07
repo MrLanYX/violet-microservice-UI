@@ -47,7 +47,7 @@
             /**
              * 提交新数据或者更新
              */
-            updata() {
+            async updata() {
                 this.dialogVisible = false
                 if (this.title == "新建文件夹") {
                     let formData = new FormData();
@@ -60,9 +60,8 @@
                             formData.append(key, params[key]);
                         }
                     });
-                    newFiles(formData).then(res => {
+                    await newFiles(formData).then(res => {
                         this.$message.success("新建文件夹成功")
-                        this.$emit("updata")
                     })
                 } else {
                     let params = {
@@ -72,7 +71,7 @@
                     if (this.fileSuffix) {
                         params.sourceName=params.sourceName+'.'+this.fileSuffix
                     }
-                    edit(params).then(res=>{
+                    await edit(params).then(res=>{
                         this.$message.success("重命名成功")
                     })
                 }

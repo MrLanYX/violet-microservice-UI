@@ -104,13 +104,18 @@
             updata() {
                 if (!this.targetId) {
                     this.$message.warning("请选择保存位置")
+                    let dom = document.querySelector('.copyShare-main').querySelector('.right').querySelector('.gdbox')
+                    dom.style.border = "1px solid red"
+                    setTimeout(() => {
+                        dom.style.border = 'none'
+                    }, 1000);
                     return
                 }
                 let param = {
                     shareId: this.key,
                     checkCode: this.mima,
-                    id:this.youDatas.clouddiscFileList[0].id,
-                    parentId:this.targetId
+                    id: this.youDatas.clouddiscFileList[0].id,
+                    parentId: this.targetId
                 }
                 shareCopy(param).then(res => {
                     console.log(res);

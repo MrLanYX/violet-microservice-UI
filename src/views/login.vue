@@ -130,6 +130,7 @@ export default {
             // 登录成功跳转
             this.$router.push({ path: this.redirect || "/" }).catch(()=>{});
           }).catch(() => {
+            this.loginForm.code="";
             this.loading = false;
             this.getCode();
           });
