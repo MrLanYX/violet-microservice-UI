@@ -224,6 +224,7 @@
              */
             dbClickRow(row, column) {
                 if (row.fileType == '1') {
+                    this.$message('暂不支持在线预览，耐心等待后续上线！');
                     return
                 }
                 let i = this.historyArr.length - 1

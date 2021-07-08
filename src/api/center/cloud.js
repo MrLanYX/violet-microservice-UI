@@ -13,7 +13,8 @@ export function newFiles(query) {
     return request({
         url: '/system/file/add',
         method: 'post',
-        data: query
+        data: query,
+        timeout: 1*60*1000
     })
 }
 // 编辑
@@ -25,7 +26,7 @@ export function edit(query) {
     })
 }
 
-// 编辑
+// 获取节点数据
 export function getFilesByParentId(query) {
     return request({
         url: '/system/file/getFilesByParentId/' + query,
@@ -109,7 +110,7 @@ export function delFile(query) {
     })
 }
 
-// 删除文件或者文件夹
+// 获取删除列表
 export function getDelFileLists(query) {
     return request({
         url: '/system/bin/list',

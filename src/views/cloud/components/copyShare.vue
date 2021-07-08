@@ -18,7 +18,7 @@
                     <span>保存位置：</span>
                     <el-input style="width:calc(100% - 80px)" placeholder="可输入关键字进行过滤" size="mini" v-model="filterText"></el-input>
                 </div>
-                <div class="gdbox" style="height:calc(100% - 38px)">
+                <div class="gdbox" style="height:calc(100% - 38px);border:1px solid #ffffff00">
                     <el-tree :data="meDatas" :props="{children: 'children',label: 'sourceName'}" default-expand-all @current-change="checkChange" :filter-node-method="filterNode" :expand-on-click-node="false" :highlight-current="true" ref="tree"></el-tree>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                     let dom = document.querySelector('.copyShare-main').querySelector('.right').querySelector('.gdbox')
                     dom.style.border = "1px solid red"
                     setTimeout(() => {
-                        dom.style.border = 'none'
+                        dom.style.border = '1px solid #ffffff00'
                     }, 1000);
                     return
                 }

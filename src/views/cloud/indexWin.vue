@@ -34,7 +34,7 @@
         <div class="folder-box" @mousedown="clearClickFun" @contextmenu="rightMenu($event,'desktop')">
             <div class="folder-box-dan" :class="{'select-folder':item.id==selectKey}" v-for="item in datas" :key="item.id" @mousedown="clickFolder($event,item.id)" @dblclick="dbClickFolder(item)" @contextmenu="rightMenu($event,'desktopFolder',item)">
                 <svg class="icon" aria-hidden="true">
-                    <use xlink:href="#iconwenjianjia"></use>
+                    <use :xlink:href="computerIcon(item)"></use>
                 </svg>
                 <div class="mt5 pl5 pt3 pr5 pb3 ms px14 oto" :title="item.sourceName">
                     {{item.sourceName}}
@@ -45,7 +45,7 @@
 
         <folder v-for="(item,i) in folders" :ref="'folder'+i" :key="i" :styles="item.style" :filesType="filesType" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
 
-
+        <!-- 
         <transition name="draw">
             <div class="message-box ms box" v-if="messageFalg">
                 <el-input v-model="searchMessage" size="mini" placeholder="请输入搜索内容"></el-input>
@@ -63,6 +63,7 @@
                             <el-button type="text" size="mini" icon="el-icon-delete" @click="cancelShare(item)">取消分享</el-button>
                         </div>
                     </div>
+                    <div class="flex -l-" style="height:100%" v-show="rightDataFilter.length==0">暂无数据</div>
                 </div>
                 <div class="pl10 pr0 pt10 pb10 pr10" v-else>
                     <div v-for="(item,index) in rightDataFilter" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
@@ -76,12 +77,14 @@
                             <el-button type="text" size="mini" icon="el-icon-delete" @click="delOperate('recover',item)">删除记录</el-button>
                         </div>
                     </div>
+                    <div class="flex -l-" style="height:100%" v-show="rightDataFilter.length==0">暂无数据</div>
                 </div>
             </div>
-        </transition>
+        </transition> -->
+        <rightMessage :messageFalg="messageFalg" :rightDataType="rightDataType" :rightData="rightData" @openMessage="openMessage" @updata="initData"></rightMessage>
 
 
-        <div class="box right-click-menu pt5 pb5" v-show="rightClickFlag" :style="'top:'+rightClickTop+'px;left:'+rightClickLeft+'px'">
+        <div class="box right-click-menu pt5 pb5" v-show="rightClickFlag" :style="rightMenuStyle">
             <div v-for="(item,i) in rightClickList" :key="i" class="text-align-l pt5 pl10 pr20 pb5 oto" :class="{'disable':!item.show}" @click="rightMenuClick($event,item)">{{item.dictLabel}}</div>
         </div>
 
@@ -96,11 +99,12 @@
 </template>
 
 <script>
-    import { flieList, newFiles, download, getShareList, delShare, delFile, getDelFileLists, Undelete, delRecord } from '@/api/center/cloud'
-    import { getQueryVariable, treeFind, copy, timeToDate } from '@/utils/index'
+    import { flieList, newFiles, download, getShareList, delFile, getDelFileLists, } from '@/api/center/cloud'
+    import { getQueryVariable, timeToDate } from '@/utils/index'
     import { ACCEPT_CONFIG } from './config/config'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
+    import rightMessage from './components/rightMessage'
     import folder from './components/folder'
     import newfolder from './components/newfolder'
     import creatShare from './components/creatShare'
@@ -111,6 +115,7 @@
         components: {
             iconfont,
             timer,
+            rightMessage,
             folder,
             newfolder,
             creatShare,
@@ -124,8 +129,7 @@
                 zIndex: 1, // 默认文件夹层级
                 routerList: false, //服务列表的显示开关
                 messageFalg: false, // 消息栏开关
-                rightClickTop: 0, // 右键菜单定位
-                rightClickLeft: 0, // 右键菜单定位
+                rightMenuStyle: '', // 右键菜单定位样式
                 rightClickFlag: false, // 控制右键菜单显隐
                 rightClickList: [], // 右键菜单列表
                 rightClickData: {}, //右击目标的数据
@@ -134,7 +138,7 @@
                 searchMessage: "", // 右侧搜索
                 rightData: [], //右侧信息栏通用数据
                 rightDataType: true, // 右侧信息栏数据显示类型，真为分享记录，假为回收站
-                fileType: ACCEPT_CONFIG.getAll(), // 文件类型
+                fileType: ACCEPT_CONFIG.getAll().toString(), // 文件类型
             }
         },
         methods: {
@@ -144,6 +148,18 @@
             initData() {
                 let ts = this
                 flieList().then(res => {
+                    if (res.data.length > 0) { // 首级排序
+                        res.data.forEach(n => {
+                            if (n.fileType == 0) {
+                                n.sort = 1000
+                            } else {
+                                let obj = this.filesType.find(item => item.dictValue == n.fileSuffix)
+                                n.sort = obj ? (1000 - obj.dictSort) : 0
+                            }
+                            console.log(n.sort);
+                        })
+                        res.data.sort((m, n) => { return n.sort - m.sort })
+                    }
                     this.datas = res.data
                 })
                 this.folders.forEach((n, i) => {
@@ -163,6 +179,10 @@
              */
             dbClickFolder(item) {
                 console.log(item);
+                if (item.fileType == 1) {
+                    this.$message('暂不支持在线预览，耐心等待后续上线！');
+                    return
+                }
                 let option = { // 当前打开的文件夹列表
                     datas: item, // 当前文件夹数据
                     open: true, // 是否打开显示在桌面
@@ -245,15 +265,19 @@
             rightMenu(e, type, val) {
                 // console.log(e, type, val);
                 this.rightClickList.forEach(n => n.show = true) // 全部选项恢复默认开启
-                this.rightClickLeft = e.pageX // 调整位置
-                this.rightClickTop = e.pageY
                 this.rightClickFlag = true // 开启窗口
+                this.$nextTick(() => { // 调整位置
+                    let box = document.querySelector('.right-click-menu')
+                    let y = (box.offsetHeight * 1 + e.pageY * 1) > window.innerHeight
+                    let x = (box.offsetWidth * 1 + e.pageX * 1) > window.innerWidth
+                    this.rightMenuStyle = (x ? 'right:0px;' : 'left:' + e.pageX + 'px;') + (y ? 'bottom:0px' : 'top:' + e.pageY + 'px')
+                })
                 if (type == 'desktopFolder' && val) { // 桌面文件夹右键
                     this.rightClickData = val
                     this.rightClickType = type
                     this.rightClickList[1].show = this.rightClickList[2].show = false
                     if (val.fileType == "1") { // 桌面文件是否开启下载
-                        this.rightClickList[0].show = false
+                        // this.rightClickList[0].show = false
                         this.rightClickList[7].show = true
                     } else {
                         this.rightClickList[0].show = true
@@ -335,6 +359,10 @@
 
                     if (this.rightClickType == "desktopFolder" && val.dictValue == "open") {
                         console.log("桌面文件夹打开");
+                        if (this.rightClickData.fileType == "1") {
+                            this.$message('暂不支持在线预览，耐心等待后续上线！');
+                            return
+                        }
                         this.dbClickFolder(this.rightClickData)
                     }
 
@@ -345,6 +373,7 @@
                     }
                     if (this.rightClickType == "tablesItem" && val.dictValue == "open" && this.rightClickData.fileType == "1") {
                         console.log("文件夹内文件打开");
+                        this.$message('暂不支持在线预览，耐心等待后续上线！');
                     }
                     if (this.rightClickType == "tablesItem" && val.dictValue == "download" && this.rightClickData.fileType == "1") {
                         console.log("文件下载");
@@ -455,64 +484,36 @@
                 }
             },
             /**
-             * 取消分享
+             * 图标计算方法
              */
-            cancelShare(item) {
-                this.$confirm('此操作将永久取消分享, 是否继续?', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    delShare(item.shareId).then(res => {
-                        this.openMessage(0)
-                        this.$message.success('分享删除成功!');
-                    })
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '删除分享已取消'
-                    });
-                });
-            },
-            /**
-             * 复制链接
-             */
-            copy(val) {
-                let url = "摸鱼站的私人云盘ヽ(✿ﾟ▽ﾟ)ノ,链接：" + location.href.split("?")[0] + "?id=" + val.shareId + ",提取钥匙：" + val.checkCode
-                copy(url)
-                this.$message.success('链接已复制至粘贴板!');
-            },
-            /**
-             * 对于删除文件后的操作
-             */
-            delOperate(type, val) {
-                if (type == "restore") { // 恢复文件
-                    Undelete({ id: val.id }).then(res => {
-                        this.openMessage(1)
-                        this.$message.success('文件恢复成功!');
-                    })
-                } else { // 删除记录
-                    delRecord([val.id]).then(res => {
-                        this.openMessage(1)
-                        this.$message.success('记录删除成功!');
-                    })
+            computerIcon(val) {
+                let type = -1
+                if (val.fileType == 0) {
+                    type = 0
+                } else {
+                    type = val.fileSuffix
                 }
-            },
+                let obj = this.filesType.find(n => n.dictValue == type)
+                return obj ? ('#' + obj.remark) : '#iconrizhi'
+            }
         },
-        mounted() {
-            this.initData()
+        async mounted() {
             this.getDicts("cloud_right_click_list").then(response => {
                 this.rightClickList = response.data;
                 this.rightClickList.forEach(n => n.show = true)
             });
-            this.getDicts("cloud_files_type").then(response => {
+            await this.getDicts("cloud_files_type").then(response => {
                 this.filesType = response.data;
             });
+            this.initData()
             // 处理分享操作
             let key = getQueryVariable("id")
             if (key) {
                 this.$refs.copyShare.initData(key)
             }
+            let el = document.documentElement;
+            let rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+            rfs.call(el);
         },
         watch: {},
         computed: {
@@ -522,9 +523,6 @@
                 let router2 = all.find(n => n.redirect == "index")
                 let routers = router1.children.concat(router2.children)
                 return routers
-            },
-            rightDataFilter() {
-                return this.rightData.filter(data => !this.searchMessage || data.fileName.toLowerCase().includes(this.searchMessage.toLowerCase()))
             },
         },
         filters: {}
