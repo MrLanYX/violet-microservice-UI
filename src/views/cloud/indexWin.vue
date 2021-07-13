@@ -101,7 +101,7 @@
 <script>
     import { flieList, newFiles, download, getShareList, delFile, getDelFileLists, } from '@/api/center/cloud'
     import { getQueryVariable, timeToDate } from '@/utils/index'
-    import { ACCEPT_CONFIG } from './config/config'
+    import { ACCEPT_CONFIG } from '@/utils/uploadConfig'
     import iconfont from './components/iconfont'
     import timer from './components/timer'
     import rightMessage from './components/rightMessage'
@@ -349,7 +349,7 @@
                     }
                     if (val.dictValue == "upload") {
                         console.log("上传文件");
-                        this.$refs.uploadBtn.$el.click()
+                        // this.$refs.uploadBtn.$el.click()
                     }
                     if (val.dictValue == "newFolder") {
                         console.log("新建文件夹");

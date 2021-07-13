@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import { newFiles,edit } from '@/api/center/cloud'
+    import { newFiles, edit } from '@/api/center/cloud'
     export default {
         name: 'newfolder',
         props: {},
@@ -69,9 +69,9 @@
                         sourceName: this.input,
                     }
                     if (this.fileSuffix) {
-                        params.sourceName=params.sourceName+'.'+this.fileSuffix
+                        params.sourceName = params.sourceName + '.' + this.fileSuffix
                     }
-                    await edit(params).then(res=>{
+                    await edit(params).then(res => {
                         this.$message.success("重命名成功")
                     })
                 }

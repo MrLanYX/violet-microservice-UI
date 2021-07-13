@@ -22,6 +22,9 @@ import Pagination from "@/components/Pagination";
 // 自定义表格工具扩展
 import RightToolbar from "@/components/RightToolbar"
 
+import uploader from 'vue-simple-uploader';
+Vue.use(uploader);
+
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
 Vue.prototype.getConfigKey = getConfigKey

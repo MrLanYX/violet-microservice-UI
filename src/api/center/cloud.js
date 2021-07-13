@@ -136,3 +136,12 @@ export function delRecord(query) {
         data: query
     })
 }
+
+// 合并请求
+export function sliceUpload(query) {
+    return request({
+        url: '/system/bin/deleteCloudRecycleBins',
+        method: 'post',
+        data: query
+    })
+}
