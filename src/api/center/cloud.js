@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询用户文件树
+// 查询用户文件树 server:cloud:fileslist
 export function flieList() {
     return request({
         url: '/system/file/list',
@@ -8,7 +8,7 @@ export function flieList() {
         // params: query
     })
 }
-// 上传文件或者新建文件夹
+// 上传文件或者新建文件夹 server:cloud:filesadd
 export function newFiles(query) {
     return request({
         url: '/system/file/add',
@@ -17,7 +17,7 @@ export function newFiles(query) {
         timeout: 1*60*1000
     })
 }
-// 编辑
+// 编辑 server:cloud:filesedit
 export function edit(query) {
     return request({
         url: '/system/file/edit',
@@ -26,7 +26,7 @@ export function edit(query) {
     })
 }
 
-// 获取节点数据
+// 获取节点数据 server:cloud:filessearch
 export function getFilesByParentId(query) {
     return request({
         url: '/system/file/getFilesByParentId/' + query,
@@ -34,7 +34,7 @@ export function getFilesByParentId(query) {
         // data: query
     })
 }
-// 下载文件
+// 下载文件 server:cloud:filesupload
 export function download(data) {
     return request({
         url: '/system/file/filedownload/' + data.id,
@@ -56,7 +56,7 @@ export function download(data) {
     })
 }
 
-// 分享列表
+// 分享列表 server:cloud:sharelist
 export function getShareList(query) {
     return request({
         url: '/system/share/list',
@@ -65,16 +65,16 @@ export function getShareList(query) {
     })
 }
 
-// 分享生成
+// 分享生成 server:cloud:shareadd
 export function shareAdd(query) {
     return request({
-        url: '/system/share',
+        url: '/system/share/add',
         method: 'post',
         data: query
     })
 }
 
-// 分享保存到自己身上
+// 分享保存到自己身上 server:cloud:sharecopy
 export function shareCopy(query) {
     return request({
         url: '/system/file/fileCollect',
@@ -83,7 +83,7 @@ export function shareCopy(query) {
     })
 }
 
-// 分享提取
+// 分享提取 server:cloud:shareget
 export function getShare(query) {
     return request({
         url: '/system/share/detail',
@@ -92,7 +92,7 @@ export function getShare(query) {
     })
 }
 
-// 删除分享
+// 删除分享 server:cloud:sharedel
 export function delShare(id) {
     return request({
         url: '/system/share/' + id,
@@ -101,7 +101,7 @@ export function delShare(id) {
     })
 }
 
-// 删除文件或者文件夹
+// 删除文件或者文件夹 server:cloud:filesdel
 export function delFile(query) {
     return request({
         url: '/system/file/deleteFile',
@@ -110,7 +110,7 @@ export function delFile(query) {
     })
 }
 
-// 获取删除列表
+// 获取删除列表 server:cloud:dellist
 export function getDelFileLists(query) {
     return request({
         url: '/system/bin/list',
@@ -119,7 +119,7 @@ export function getDelFileLists(query) {
     })
 }
 
-// 对单文件恢复删除的文件
+// 对单文件恢复删除的文件 server:cloud:delrestort
 export function Undelete(query) {
     return request({
         url: '/system/bin/recoverCloudRecycleBin',
@@ -128,7 +128,7 @@ export function Undelete(query) {
     })
 }
 
-// 删除一条删除记录
+// 删除一条删除记录 server:cloud:deldel
 export function delRecord(query) {
     return request({
         url: '/system/bin/deleteCloudRecycleBins',
@@ -137,7 +137,7 @@ export function delRecord(query) {
     })
 }
 
-// 合并请求
+// 合并请求 server:cloud:filemerge
 export function mergeFile(query) {
     return request({
         url: '/system/file/mergeFile',

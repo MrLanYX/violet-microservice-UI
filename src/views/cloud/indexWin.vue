@@ -3,6 +3,7 @@
         <div class="bottom-nav box ms flex -l- px32">
             <div class="pl5 flex -l-">
                 <iconfont size="40" icon="#iconguanji" bg="#eee" text="关机" @click="logout"></iconfont>
+                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <iconfont size="40" icon="#iconfenxiang" bg="#eee" text="分享管理" @click="openMessage(0)"></iconfont>
                 <iconfont size="40" icon="#iconshanchu" bg="#eee" text="回收站" @click="openMessage(1)"></iconfont>
@@ -25,8 +26,7 @@
                 <iconfont size="40" :icon="routerList?'#iconxiangyouzhankai':'#iconHdonghua-xiangzuozhankai'" bg="#eee" text="服务列表" @click="routerList=!routerList"></iconfont>
                 <el-divider direction="vertical"></el-divider>
                 <timer></timer>
-                <iconfont size="40" icon="#iconpingtai" bg="#eee" text="回到桌面" @click="goDock"></iconfont>
-                <!-- <iconfont size="40" icon="#icontonggao" bg="#eee" text="消息中心" @click="openMessage(2)"></iconfont> -->
+                <iconfont size="40" icon="#iconshangchuan" bg="#eee" text="上传中心" @click="$refs.sliceUpload.init()"></iconfont>
             </div>
         </div>
 
@@ -45,42 +45,6 @@
 
         <folder v-for="(item,i) in folders" :ref="'folder'+i" :key="i" :styles="item.style" :filesType="filesType" :open.sync="item.open" :delFlag.sync="item.del" :obj.sync="item.datas"></folder>
 
-        <!-- 
-        <transition name="draw">
-            <div class="message-box ms box" v-if="messageFalg">
-                <el-input v-model="searchMessage" size="mini" placeholder="请输入搜索内容"></el-input>
-                <div class="pl10 pr0 pt10 pb10 pr10" v-if="rightDataType">
-                    <div v-for="(item,index) in rightDataFilter" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
-                        <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
-                        <div class="pt10 pl10 pr10 pb20">
-                            <p><i class="el-icon-paperclip"></i> 分享创建时间：{{item.createTime}}</p>
-                            <p><i class="el-icon-timer"></i> 分享剩余时长：{{item.shareType}}</p>
-                            <p v-if="item.shareType!='已过期'" style="word-break: break-all"><i class="el-icon-link"></i>分享链接：<span style="user-select: all;cursor: pointer">{{item.shareUrl}}</span></p>
-                            <p v-if="item.shareType!='已过期'"><i class="el-icon-key"></i> 分享提取密码：{{item.checkCode}}</p>
-                        </div>
-                        <div class="text-align-r pr10">
-                            <el-button v-if="item.shareType!='已过期'" type="text" size="mini" icon="el-icon-document" @click="copy(item)">一键复制</el-button>
-                            <el-button type="text" size="mini" icon="el-icon-delete" @click="cancelShare(item)">取消分享</el-button>
-                        </div>
-                    </div>
-                    <div class="flex -l-" style="height:100%" v-show="rightDataFilter.length==0">暂无数据</div>
-                </div>
-                <div class="pl10 pr0 pt10 pb10 pr10" v-else>
-                    <div v-for="(item,index) in rightDataFilter" class="mb10 message-box-card" :key="index" :style="messageFalg?('animation: cardIpnut .8s ease-out '+((index+1)*0.2)+'s both alternate;'):''">
-                        <div class="message-box-title pt10 pl10 pr10 pb5 oto">{{item.fileName}}</div>
-                        <div class="pt10 pl10 pr10 pb20">
-                            <p><i class="el-icon-printer"></i> 删除时间：{{item.createTime}}</p>
-                            <p><i class="el-icon-timer"></i> 剩余恢复时长：{{item.date}}</p>
-                        </div>
-                        <div class="text-align-r pr10">
-                            <el-button v-if="item.date!='已过期'" type="text" size="mini" icon="el-icon-finished" @click="delOperate('restore',item)">恢复删除</el-button>
-                            <el-button type="text" size="mini" icon="el-icon-delete" @click="delOperate('recover',item)">删除记录</el-button>
-                        </div>
-                    </div>
-                    <div class="flex -l-" style="height:100%" v-show="rightDataFilter.length==0">暂无数据</div>
-                </div>
-            </div>
-        </transition> -->
         <rightMessage :messageFalg="messageFalg" :rightDataType="rightDataType" :rightData="rightData" @openMessage="openMessage" @updata="initData"></rightMessage>
 
 
@@ -379,7 +343,7 @@
                         console.log("文件夹内文件打开");
                         this.$message('暂不支持在线预览，耐心等待后续上线！');
                     }
-                    if (this.rightClickType == "tablesItem" && val.dictValue == "download" && this.rightClickData.fileType == "1") {
+                    if (val.dictValue == "download" && this.rightClickData.fileType == "1") {
                         console.log("文件下载");
                         download(this.rightClickData).then(res => {})
                     }

@@ -5,7 +5,7 @@
             <uploader-unsupport></uploader-unsupport>
             <uploader-drop>
                 <div>
-                    <uploader-btn id="global-uploader-btn" :attrs="attrs" ref="uploadBtn">选择文件<i class="el-icon-upload el-icon--right"></i></uploader-btn>
+                    <uploader-btn id="global-uploader-btn" :directory="false" :attrs="attrs" ref="uploadBtn">选择文件<i class="el-icon-upload el-icon--right"></i></uploader-btn>
                 </div>
             </uploader-drop>
             <uploader-list></uploader-list>
@@ -14,8 +14,8 @@
 </template>
 
 <script>
-    import { ACCEPT_CONFIG } from '@/utils/uploadConfig'
     import SparkMD5 from 'spark-md5';
+    import { ACCEPT_CONFIG } from '@/utils/uploadConfig'
     import { getToken } from "@/utils/auth";
     import { mergeFile } from "@/api/center/cloud";
 
@@ -68,8 +68,16 @@
         },
         methods: {
             init(id) {
-                this.parentId = id
                 this.uploadVisible = true
+                this.parentId = id
+                this.$nextTick(() => {
+                    if (id) {
+                        this.$refs.uploadBtn.support = true
+                    } else {
+                        this.$refs.uploadBtn.support = false
+                    }
+
+                })
             },
             onFileAdded(file) {
                 file.parentId = this.parentId
@@ -83,14 +91,15 @@
             */
             onFileSuccess(rootFile, file, response, chunk) {
                 //refProjectId为预留字段，可关联附件所属目标，例如所属档案，所属工程等
-                // file.refProjectId = "123456789";
+                file.refProjectId = "123456789";
                 mergeFile(file).then(responseData => {
                     if (responseData.data.code === 415) {
                         console.log("合并操作未成功，结果码：" + responseData.data.code);
                     }
                     this.$emit('updata')
-                }).catch(function(error) {
+                }).catch((error) => {
                     console.log("合并后捕获的未知异常：" + error);
+                    this.$emit('updata')
                 });
             },
             onFileError(rootFile, file, response, chunk) {
@@ -114,6 +123,7 @@
                         message: '文件大小不能超过2G'
                     });
                     file.cancel();
+                    return false
                 }
 
                 let fileReader = new FileReader();
@@ -166,33 +176,43 @@
                     duration: 2000
                 })
             },
-            onFileProgress() {},
+            onFileProgress(rootFile, file, response, chunk) {
+                console.log(rootFile, file, response, chunk);
+            },
         }
     }
 </script>
 
-<style>
+<style lang="scss">
     .uploader-ui {
         margin: 0 auto;
         font-size: 12px;
-    }
 
-    .uploader-ui .uploader-btn {
-        margin-right: 4px;
-        font-size: 12px;
-        border-radius: 3px;
-        color: #FFF;
-        background-color: #409EFF;
-        border-color: #409EFF;
-        display: inline-block;
-        line-height: 1;
-        white-space: nowrap;
-    }
+        .uploader-drop {
+            padding: 0;
 
-    .uploader-ui .uploader-list {
-        max-height: 440px;
-        overflow: auto;
-        overflow-x: hidden;
-        overflow-y: auto;
+            .uploader-btn {
+                margin: 10px 0 10px 15px;
+            }
+        }
+
+        .uploader-btn {
+            margin-right: 4px;
+            font-size: 12px;
+            border-radius: 3px;
+            color: #FFF;
+            background-color: #409EFF;
+            border-color: #409EFF;
+            display: inline-block;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .uploader-list {
+            max-height: 440px;
+            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
     }
 </style>
