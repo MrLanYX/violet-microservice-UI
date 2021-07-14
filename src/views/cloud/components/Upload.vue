@@ -1,27 +1,30 @@
 <template>
-    <!-- 上传器 -->
-    <uploader ref="uploader" :options="options" :autoStart=false :file-status-text="fileStatusText" @file-added="onFileAdded" @file-success="onFileSuccess" @file-progress="onFileProgress" @file-error="onFileError" class="uploader-ui">
-        <uploader-unsupport></uploader-unsupport>
-        <uploader-drop>
-            <div>
-                <uploader-btn id="global-uploader-btn" :attrs="attrs" ref="uploadBtn">选择文件<i class="el-icon-upload el-icon--right"></i></uploader-btn>
-            </div>
-        </uploader-drop>
-        <uploader-list></uploader-list>
-    </uploader>
+    <el-dialog title="文件上传" :visible.sync="uploadVisible" width="60%">
+        <!-- 上传器 -->
+        <uploader ref="uploader" :options="options" :autoStart=false :file-status-text="fileStatusText" @file-added="onFileAdded" @file-success="onFileSuccess" @file-progress="onFileProgress" @file-error="onFileError" class="uploader-ui">
+            <uploader-unsupport></uploader-unsupport>
+            <uploader-drop>
+                <div>
+                    <uploader-btn id="global-uploader-btn" :attrs="attrs" ref="uploadBtn">选择文件<i class="el-icon-upload el-icon--right"></i></uploader-btn>
+                </div>
+            </uploader-drop>
+            <uploader-list></uploader-list>
+        </uploader>
+    </el-dialog>
 </template>
 
 <script>
     import { ACCEPT_CONFIG } from '@/utils/uploadConfig'
     import SparkMD5 from 'spark-md5';
-    // import { mergeFile } from "@/api/modules/uploadFile";
+    import { getToken } from "@/utils/auth";
+    import { mergeFile } from "@/api/center/cloud";
 
     export default {
         data() {
             return {
                 options: {
                     //目标上传 URL，默认POST
-                    target: process.env.VUE_APP_BASE_API + "/uploader/chunk",
+                    target: process.env.VUE_APP_BASE_API + "/system/file/chunk",
                     //分块大小(单位：字节)
                     chunkSize: '2048000',
                     //上传文件时文件内容的参数名，对应chunk里的Multipart对象名，默认对象名为file
@@ -43,7 +46,11 @@
                             return true;
                         }
                         return (objMessage.uploadedChunks || []).indexOf(chunk.offset + 1) >= 0;
-                    }
+                    },
+                    headers: {
+                        // 在header中添加的验证，请根据实际业务来
+                        Authorization: "Bearer " + getToken()
+                    },
                 },
                 attrs: {
                     accept: ACCEPT_CONFIG.getAll()
@@ -55,10 +62,17 @@
                     paused: '暂停',
                     waiting: '等待上传'
                 },
+                uploadVisible: false,
+                parentId: '',
             }
         },
         methods: {
+            init(id) {
+                this.parentId = id
+                this.uploadVisible = true
+            },
             onFileAdded(file) {
+                file.parentId = this.parentId
                 this.computeMD5(file);
             },
             /*
@@ -69,11 +83,12 @@
             */
             onFileSuccess(rootFile, file, response, chunk) {
                 //refProjectId为预留字段，可关联附件所属目标，例如所属档案，所属工程等
-                file.refProjectId = "123456789";
+                // file.refProjectId = "123456789";
                 mergeFile(file).then(responseData => {
                     if (responseData.data.code === 415) {
                         console.log("合并操作未成功，结果码：" + responseData.data.code);
                     }
+                    this.$emit('updata')
                 }).catch(function(error) {
                     console.log("合并后捕获的未知异常：" + error);
                 });
@@ -150,18 +165,16 @@
                     type: 'error',
                     duration: 2000
                 })
-            }
+            },
+            onFileProgress() {},
         }
     }
 </script>
 
 <style>
     .uploader-ui {
-        padding: 15px;
-        margin: 40px auto 0;
+        margin: 0 auto;
         font-size: 12px;
-        font-family: Microsoft YaHei;
-        box-shadow: 0 0 10px rgba(0, 0, 0, .4);
     }
 
     .uploader-ui .uploader-btn {

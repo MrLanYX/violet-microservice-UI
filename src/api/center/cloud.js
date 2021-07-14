@@ -138,9 +138,9 @@ export function delRecord(query) {
 }
 
 // 合并请求
-export function sliceUpload(query) {
+export function mergeFile(query) {
     return request({
-        url: '/system/bin/deleteCloudRecycleBins',
+        url: '/system/file/mergeFile',
         method: 'post',
         data: query
     })

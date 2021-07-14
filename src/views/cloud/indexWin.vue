@@ -95,6 +95,7 @@
         <newfolder ref="newfolder" @updata="initData"></newfolder>
         <creatShare ref="creatShare"></creatShare>
         <copyShare ref="copyShare" @updata="initData"></copyShare>
+        <sliceUpload ref="sliceUpload" @updata="initData"></sliceUpload>
     </div>
 </template>
 
@@ -109,6 +110,7 @@
     import newfolder from './components/newfolder'
     import creatShare from './components/creatShare'
     import copyShare from './components/copyShare'
+    import sliceUpload from './components/Upload.vue'
     export default {
         name: '',
         props: {},
@@ -120,6 +122,7 @@
             newfolder,
             creatShare,
             copyShare,
+            sliceUpload,
         },
         data() {
             return {
@@ -349,6 +352,7 @@
                     }
                     if (val.dictValue == "upload") {
                         console.log("上传文件");
+                        this.$refs.sliceUpload.init(this.rightClickData.id)
                         // this.$refs.uploadBtn.$el.click()
                     }
                     if (val.dictValue == "newFolder") {
