@@ -76,7 +76,6 @@
                     } else {
                         this.$refs.uploadBtn.support = false
                     }
-
                 })
             },
             onFileAdded(file) {
